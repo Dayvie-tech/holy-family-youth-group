@@ -21,6 +21,34 @@
       </header>
 
       <section id="admin-page" class="admin-workspace">
+        <section id="super-admin-panel" class="super-admin-panel" hidden aria-labelledby="super-admin-title">
+          <div class="section-heading">
+            <p class="eyebrow blue">GOVERNANCE & ACCESS</p>
+            <h2 id="super-admin-title">Super Admin offices</h2>
+            <p>The four offices have equal authority. Assigning an occupied office transfers it to the selected approved member.</p>
+          </div>
+          <div id="super-admin-status" class="form-message" role="status" aria-live="polite" hidden></div>
+          <div id="super-admin-office-list" class="super-admin-office-list" aria-live="polite">
+            <div class="admin-empty">Loading office holders…</div>
+          </div>
+          <form id="super-admin-assignment-form" class="super-admin-assignment-form">
+            <h3>Appoint or transfer an office</h3>
+            <label for="super-admin-office">Super Admin office</label>
+            <select id="super-admin-office" required>
+              <option value="">Choose an office</option>
+              <option>Youth Chaplain</option>
+              <option>Youth Matron</option>
+              <option>Youth Patron</option>
+              <option>Parish Moderator</option>
+            </select>
+            <label for="super-admin-member">Approved member</label>
+            <select id="super-admin-member" required>
+              <option value="">Loading approved members…</option>
+            </select>
+            <button id="assign-super-admin" class="button" type="submit">Save office appointment</button>
+            <p class="admin-footnote">The current holder remains active unless the transfer is successfully completed. All changes are recorded in the administration activity log.</p>
+          </form>
+        </section>
         <div class="admin-intro">
           <p class="eyebrow blue">MEMBERSHIP MANAGEMENT</p>
           <h1>Registration applications</h1>
