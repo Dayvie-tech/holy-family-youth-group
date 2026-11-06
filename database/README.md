@@ -63,3 +63,8 @@ The first Super Administrator must still be bootstrapped manually and
 deliberately after the intended account has completed email verification.
 Do not create public signup fields or policies that allow users to assign
 themselves administrative access.
+
+
+## Migration 005 — least-privilege approval
+
+Replaces the exposed review RPC with a narrow column-level update grant and an RLS policy that permits only an authorised administrator to move a pending profile to approved. A private trigger records the approval in the audit log. Browser clients cannot update profile names, contact details, house assignments, or other profile fields through this policy.
