@@ -269,6 +269,9 @@ async function setupAdminDashboard() {
   const list = $('application-list');
   const count = $('application-count');
   const reload = $('reload-applications');
+  const claimList = $('appointment-claim-list');
+  const claimStatus = $('appointment-claim-status');
+  const claimCount = $('appointment-claim-count');
 
   const showAdminError = (message) => showMessage(status, message, 'error');
 
@@ -345,6 +348,100 @@ async function setupAdminDashboard() {
   });
 
 
+  async function loadAppointmentClaims(user, houseNames) {
+    claimList.innerHTML = '<div class="admin-empty">Loading leadership claims…</div>';
+    const { data: claims, error } = await supabase
+      .from('appointments')
+      .select('id, member_id, office_name, scope, prayer_house_id, nominated_at')
+      .eq('verification_status', 'pending')
+      .order('nominated_at', { ascending: true });
+    if (error) throw error;
+
+    if (!claims?.length) {
+      claimList.innerHTML = '<div class="admin-empty">There are no pending leadership appointment claims in your authorized area.</div>';
+      claimCount.textContent = '0';
+      return;
+    }
+
+    const memberIds = [...new Set(claims.map((claim) => claim.member_id))];
+    const { data: members, error: membersError } = await supabase
+      .from('profiles')
+      .select('id, full_name, primary_prayer_house_id')
+      .in('id', memberIds);
+    if (membersError) throw membersError;
+    const memberMap = new Map((members || []).map((member) => [member.id, member]));
+
+    claimCount.textContent = String(claims.length);
+    claimList.replaceChildren();
+    claims.forEach((claim) => {
+      const member = memberMap.get(claim.member_id);
+      const card = document.createElement('article');
+      card.className = 'application-card';
+      const heading = document.createElement('div');
+      heading.className = 'application-heading';
+      const name = document.createElement('h3');
+      name.textContent = member?.full_name || 'Member';
+      const scope = document.createElement('span');
+      scope.className = 'claim-scope-tag';
+      scope.textContent = claim.scope === 'parish' ? 'Parish-level claim' : (houseNames.get(claim.prayer_house_id) || 'Prayer-house claim');
+      heading.append(name, scope);
+
+      const meta = document.createElement('p');
+      meta.className = 'application-meta';
+      meta.textContent = claim.office_name + ' · Submitted ' + new Date(claim.nominated_at).toLocaleDateString();
+
+      const actions = document.createElement('div');
+      actions.className = 'application-actions';
+      const verify = document.createElement('button');
+      verify.type = 'button';
+      verify.textContent = 'Verify appointment';
+      const reject = document.createElement('button');
+      reject.type = 'button';
+      reject.className = 'reject-claim';
+      reject.textContent = 'Reject claim';
+
+      async function reviewClaim(decision, button) {
+        verify.disabled = true;
+        reject.disabled = true;
+        button.textContent = decision === 'verified' ? 'Verifying…' : 'Rejecting…';
+        try {
+          const { data, error: reviewError } = await supabase
+            .from('appointments')
+            .update({
+              verification_status: decision,
+              verified_by: user.id,
+              verified_at: new Date().toISOString()
+            })
+            .eq('id', claim.id)
+            .eq('verification_status', 'pending')
+            .select('id')
+            .maybeSingle();
+          if (reviewError) throw reviewError;
+          if (!data) throw new Error('This claim is no longer pending or is outside your administrator permissions.');
+
+          card.remove();
+          if (!claimList.querySelector('.application-card')) {
+            claimList.innerHTML = '<div class="admin-empty">There are no pending leadership appointment claims in your authorized area.</div>';
+          }
+          claimCount.textContent = String(Math.max(0, Number(claimCount.textContent) - 1));
+          showMessage(claimStatus, claim.office_name + ' claim ' + (decision === 'verified' ? 'verified' : 'rejected') + ' successfully.', 'success');
+        } catch (reviewError) {
+          showMessage(claimStatus, reviewError.message || 'The appointment claim could not be reviewed.', 'error');
+          verify.disabled = false;
+          reject.disabled = false;
+          verify.textContent = 'Verify appointment';
+          reject.textContent = 'Reject claim';
+        }
+      }
+
+      verify.addEventListener('click', () => reviewClaim('verified', verify));
+      reject.addEventListener('click', () => reviewClaim('rejected', reject));
+      actions.append(verify, reject);
+      card.append(heading, meta, actions);
+      claimList.append(card);
+    });
+  }
+
   async function loadApplications() {
     status.hidden = true;
     list.innerHTML = '';
@@ -388,10 +485,8 @@ async function setupAdminDashboard() {
       count.textContent = String(applications?.length || 0);
       if (!applications?.length) {
         list.innerHTML = '<div class="admin-empty">There are no pending membership applications.</div>';
-        return;
-      }
-
-      applications.forEach((application) => {
+      } else {
+        applications.forEach((application) => {
         const card = document.createElement('article');
         card.className = 'application-card';
 
@@ -441,7 +536,10 @@ async function setupAdminDashboard() {
         actions.append(approve);
         card.append(heading, meta, actions);
         list.append(card);
-      });
+        });
+      }
+
+      await loadAppointmentClaims(user, houseNames);
     } catch (error) {
       showAdminError(error.message || 'Unable to load membership applications.');
     } finally {
