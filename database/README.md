@@ -1,6 +1,6 @@
 # Database
 
-The Supabase project `holy-family-youth-group` has been created and the first two migrations have been applied and verified.
+The Supabase project `holy-family-youth-group` has been created. Three migrations have now been applied to the remote project and recorded in this repository's development branch.
 
 ## Applied migrations
 
@@ -16,15 +16,19 @@ The Supabase project `holy-family-youth-group` has been created and the first tw
    - Separates Super Administrator insert/update/delete policies.
    - Adds indexes for foreign-key lookups.
 
+3. `migrations/003_member_registration.sql`
+   - Adds a private-schema trigger function that creates a pending profile when a Supabase Auth user is created.
+   - Stores a private phone number and validated prayer-house selection.
+   - Optionally records an allow-listed parish or prayer-house office claim as pending.
+   - Does not create admin assignments or trust user metadata for authorization.
+
 ## Verification
 
-- Four foundational public tables exist.
-- All four have RLS enabled.
 - Eight prayer-house records are seeded.
-- Security Advisor currently reports no security lints.
-- Performance Advisor reports only unused-index informational notices; those indexes are expected to become useful as records and queries are added.
-
-Review `SECURITY-MODEL.md` before building authentication and approval workflows.
+- The auth user creation trigger is present on `auth.users`.
+- The foundational tables retain row-level security.
+- The latest Security Advisor check should be reviewed again after the registration migration.
+- Unused-index notices are informational while the tables have little data; do not drop the indexes solely for that reason.
 
 ## Planned domains
 
