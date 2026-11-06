@@ -27,7 +27,8 @@ The Supabase project `holy-family-youth-group` has been created. Three migration
 - Eight prayer-house records are seeded.
 - The auth user creation trigger is present on `auth.users`.
 - The foundational tables retain row-level security.
-- The latest Security Advisor check should be reviewed again after the registration migration.
+- Security Advisor currently reports zero security lints after the registration migration.
+- The auth user creation trigger is present exactly once, and the profiles table still has RLS enabled.
 - Unused-index notices are informational while the tables have little data; do not drop the indexes solely for that reason.
 
 ## Planned domains
