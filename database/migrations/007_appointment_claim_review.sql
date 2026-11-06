@@ -27,8 +27,11 @@ create policy appointments_admin_review_pending
     )
   );
 
--- Do not let browser clients alter the claimant, office, scope, or house.
-revoke update on public.appointments from public, anon, authenticated;
+-- Remove broad/default table grants, then restore only the required operations.
+-- UPDATE is restricted to the three review fields; claimant and office details
+-- cannot be changed by a browser client.
+revoke all on public.appointments from public, anon, authenticated;
+grant select, insert on public.appointments to authenticated;
 grant update (verification_status, verified_by, verified_at)
   on public.appointments to authenticated;
 
