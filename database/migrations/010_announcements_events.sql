@@ -232,7 +232,7 @@ create policy events_author_edit
 -- Only parish-level administrators review pending submissions.
 create policy announcements_parish_review
   on public.announcements for update to authenticated
-  using (status = 'pending_approval' and (select private.has_parish_admin_access()))
+  using (status = 'pending_approval' and author_id <> (select auth.uid()) and (select private.has_parish_admin_access()))
   with check (
     status in ('approved', 'rejected')
     and reviewer_id = (select auth.uid())
@@ -276,6 +276,33 @@ create policy events_parish_publish
 create policy community_content_activity_parish_read
   on public.community_content_activity for select to authenticated
   using ((select private.has_parish_admin_access()));
+
+-- Ownership and audience are immutable after creation. This prevents a reviewer
+-- from silently transferring content to another author or prayer house.
+create or replace function private.guard_community_content_identity()
+returns trigger
+language plpgsql
+set search_path = ''
+as $function$
+begin
+  if new.author_id is distinct from old.author_id
+    or new.scope is distinct from old.scope
+    or new.prayer_house_id is distinct from old.prayer_house_id then
+    raise exception 'Content ownership and audience cannot be changed after creation.';
+  end if;
+  return new;
+end;
+$function$;
+
+revoke all on function private.guard_community_content_identity() from public, anon, authenticated;
+
+create trigger announcements_guard_identity
+  before update on public.announcements
+  for each row execute function private.guard_community_content_identity();
+
+create trigger events_guard_identity
+  before update on public.events
+  for each row execute function private.guard_community_content_identity();
 
 -- A private trigger records content creation, submission, review and publication.
 create or replace function private.audit_community_content_change()
