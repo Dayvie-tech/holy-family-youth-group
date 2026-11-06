@@ -169,7 +169,7 @@ async function setupCallback() {
 async function setupProtectedPage() {
   const page = $('protected-page');
   if (!page) return;
-  const status = $('protected-status');
+  const status = $('access-check');
   const { data: sessionData } = await supabase.auth.getSession();
   if (!sessionData.session?.user) {
     window.location.replace('login.html');
