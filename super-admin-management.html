@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c4265">
+  <title>Super Admin Management | Holy Family Youth Group</title>
+  <link rel="icon" href="holy-family-youth-group-logo.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="admin-dashboard.css">
+  <link rel="stylesheet" href="super-admin-management.css">
+</head>
+<body>
+  <main class="auth-shell">
+    <div class="container admin-container">
+      <header class="admin-topbar">
+        <a class="admin-brand" href="index.html">
+          <img src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
+          <span><strong>Holy Family Youth Group</strong><small>Super Admin workspace</small></span>
+        </a>
+        <div class="admin-top-actions">
+          <a class="button button-light" href="admin-dashboard.html">Membership approvals</a>
+          <button id="sign-out" class="button button-light" type="button">Sign out</button>
+        </div>
+      </header>
+
+      <section id="super-admin-page" class="admin-workspace" hidden>
+        <div class="admin-intro">
+          <p class="eyebrow blue">PARISH GOVERNANCE</p>
+          <h1>Super Admin Management</h1>
+          <p>Manage the four parish-wide Super Admin offices and their current holders.</p>
+        </div>
+
+        <div class="governance-note">
+          <strong>Equal authority. Shared responsibility.</strong>
+          <span>The Youth Chaplain, Youth Matron, Youth Patron and Parish Moderator offices have equal system authority. No office outranks another.</span>
+        </div>
+
+        <div class="admin-summary">
+          <div><span class="summary-label">Active Super Admin offices</span><strong id="office-count">— / 4</strong></div>
+          <button id="refresh-offices" class="button button-light" type="button">Refresh offices</button>
+        </div>
+
+        <div id="super-admin-status" class="form-message" role="status" aria-live="polite" hidden></div>
+        <div id="super-admin-offices" class="super-admin-grid" aria-live="polite">
+          <div class="admin-empty">Loading Super Admin offices…</div>
+        </div>
+        <p class="admin-footnote">Only approved members can be appointed. Reassigning an occupied office safely deactivates the previous appointment and records the change in the administrative activity log.</p>
+      </section>
+
+      <div id="super-admin-check" class="auth-status">Checking administrator access…</div>
+    </div>
+  </main>
+  <script type="module" src="super-admin-management.js"></script>
+</body>
+</html>
