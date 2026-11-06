@@ -290,6 +290,8 @@ async function setupAdminDashboard() {
         .eq('user_id', user.id)
         .eq('is_active', true);
       if (assignmentError) throw assignmentError;
+      const superAdminLink = $('super-admin-management-link');
+      if (superAdminLink) superAdminLink.hidden = !assignments?.some((assignment) => assignment.access_level === 'super_admin');
       if (!assignments?.length) {
         window.location.replace('member-dashboard.html');
         return;
