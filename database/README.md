@@ -1,6 +1,6 @@
 # Database
 
-Backend schema and migrations will be introduced here after the Supabase project configuration is confirmed.
+Migration 001 now defines the identity and access-control foundation. Review `SECURITY-MODEL.md` and `migrations/001_identity_and_access.sql` before applying it to a fresh Supabase project.
 
 Planned domains:
 - profiles and member approval
