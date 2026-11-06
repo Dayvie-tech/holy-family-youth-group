@@ -229,7 +229,7 @@ async function setupPendingPage() {
       .single();
     if (error || !profile) throw new Error('Your member profile is not available yet. Please contact the portal administrator.');
     if (profile.membership_status === 'approved') {
-      window.location.replace('member-dashboard.html');
+      await membershipDestination(data.session.user);
       return;
     }
     if (profile.membership_status === 'suspended') {
