@@ -10,12 +10,6 @@ function message(text, type = 'info') {
   element.hidden = false;
 }
 
-function escapeText(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (character) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  })[character]);
-}
-
 async function loadManagement() {
   const status = $('super-admin-status');
   const grid = $('super-admin-offices');
