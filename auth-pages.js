@@ -343,10 +343,11 @@ async function setupAdminDashboard() {
           approve.disabled = true;
           approve.textContent = 'Approving…';
           try {
-            const { error: reviewError } = await supabase.rpc('review_membership', {
-              target_member_id: application.id,
-              decision: 'approve'
-            });
+            const { error: reviewError } = await supabase
+              .from('profiles')
+              .update({ membership_status: 'approved', updated_at: new Date().toISOString() })
+              .eq('id', application.id)
+              .eq('membership_status', 'pending');
             if (reviewError) throw reviewError;
             card.remove();
             count.textContent = String(Math.max(0, Number(count.textContent) - 1));
