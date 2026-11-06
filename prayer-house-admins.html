@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c4265">
+  <title>Prayer-house administrators | Holy Family Youth Group</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="admin-dashboard.css">
+  <link rel="stylesheet" href="prayer-house-admins.css">
+</head>
+<body>
+  <main class="auth-shell">
+    <div class="container admin-container">
+      <header class="admin-topbar">
+        <a class="admin-brand" href="index.html">
+          <img src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
+          <span><strong>Holy Family Youth Group</strong><small>Prayer-house administration</small></span>
+        </a>
+        <div class="admin-header-actions">
+          <a class="button button-light" href="admin-dashboard.html">Back to dashboard</a>
+          <button id="sign-out" class="button button-light" type="button">Sign out</button>
+        </div>
+      </header>
+
+      <section id="house-admin-page" class="admin-workspace" hidden>
+        <div class="admin-intro">
+          <p class="eyebrow blue">GOVERNANCE & ACCESS</p>
+          <h1>Prayer-house administrators</h1>
+          <p>Appoint one active administrator for each prayer house. Transferring an occupied house moves the appointment to the selected approved member.</p>
+        </div>
+
+        <div id="house-admin-status" class="form-message" role="status" aria-live="polite" hidden></div>
+        <div id="house-admin-list" class="house-admin-list" aria-live="polite">
+          <div class="admin-empty">Loading the eight prayer houses…</div>
+        </div>
+
+        <form id="house-admin-form" class="super-admin-assignment-form house-admin-form">
+          <h2>Appoint or transfer an administrator</h2>
+          <label for="house-admin-house">Prayer house</label>
+          <select id="house-admin-house" required>
+            <option value="">Loading prayer houses…</option>
+          </select>
+          <label for="house-admin-member">Approved member</label>
+          <select id="house-admin-member" required>
+            <option value="">Loading approved members…</option>
+          </select>
+          <button id="save-house-admin" class="button" type="submit">Save administrator appointment</button>
+          <p class="admin-footnote">An administrator can be assigned to more than one prayer house. Their access is limited to the house or houses assigned to them. Appointments are recorded in the administration activity log.</p>
+        </form>
+      </section>
+
+      <div id="house-admin-loading" class="admin-empty">Checking your administrator access…</div>
+    </div>
+  </main>
+  <script type="module" src="prayer-house-admins.js"></script>
+</body>
+</html>
