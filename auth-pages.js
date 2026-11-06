@@ -272,6 +272,79 @@ async function setupAdminDashboard() {
 
   const showAdminError = (message) => showMessage(status, message, 'error');
 
+  const superAdminPanel = $('super-admin-panel');
+  const superAdminStatus = $('super-admin-status');
+  const officeList = $('super-admin-office-list');
+  const assignmentForm = $('super-admin-assignment-form');
+  const officeSelect = $('super-admin-office');
+  const memberSelect = $('super-admin-member');
+  const superAdminOffices = ['Youth Chaplain', 'Youth Matron', 'Youth Patron', 'Parish Moderator'];
+
+  async function loadSuperAdminPanel() {
+    if (!superAdminPanel) return;
+    superAdminPanel.hidden = false;
+    officeList.innerHTML = '<div class="admin-empty">Loading office holders…</div>';
+    const [membersResult, assignmentsResult] = await Promise.all([
+      supabase.from('profiles').select('id, full_name').eq('membership_status', 'approved').order('full_name'),
+      supabase.from('admin_assignments').select('user_id, super_admin_office').eq('access_level', 'super_admin').eq('is_active', true)
+    ]);
+    if (membersResult.error) throw membersResult.error;
+    if (assignmentsResult.error) throw assignmentsResult.error;
+    const members = membersResult.data || [];
+    const holders = new Map((assignmentsResult.data || []).map((item) => [item.super_admin_office, item.user_id]));
+    const names = new Map(members.map((member) => [member.id, member.full_name]));
+    officeList.replaceChildren();
+    superAdminOffices.forEach((office) => {
+      const card = document.createElement('article');
+      card.className = 'super-admin-office-card';
+      const title = document.createElement('strong');
+      title.textContent = office;
+      const holder = document.createElement('span');
+      const holderId = holders.get(office);
+      holder.textContent = holderId ? (names.get(holderId) || 'Assigned member') : 'Vacant';
+      card.append(title, holder);
+      officeList.append(card);
+    });
+    memberSelect.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = members.length ? 'Choose an approved member' : 'No approved members available';
+    memberSelect.append(placeholder);
+    members.forEach((member) => {
+      const option = document.createElement('option');
+      option.value = member.id;
+      option.textContent = member.full_name;
+      memberSelect.append(option);
+    });
+  }
+
+  assignmentForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const office = officeSelect.value;
+    const memberId = memberSelect.value;
+    if (!office || !memberId) return;
+    const submit = $('assign-super-admin');
+    submit.disabled = true;
+    submit.textContent = 'Saving appointment…';
+    superAdminStatus.hidden = true;
+    try {
+      const { error } = await supabase.rpc('assign_super_admin_office', {
+        p_target_user_id: memberId,
+        p_office: office
+      });
+      if (error) throw error;
+      showMessage(superAdminStatus, office + ' appointment saved successfully. The previous holder, if any, has been moved out of that office.', 'success');
+      assignmentForm.reset();
+      await loadSuperAdminPanel();
+    } catch (error) {
+      showMessage(superAdminStatus, error.message || 'The office appointment could not be saved.', 'error');
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Save office appointment';
+    }
+  });
+
+
   async function loadApplications() {
     status.hidden = true;
     list.innerHTML = '';
@@ -293,6 +366,10 @@ async function setupAdminDashboard() {
       if (!assignments?.length) {
         window.location.replace('member-dashboard.html');
         return;
+      }
+
+      if (assignments.some((assignment) => assignment.access_level === 'super_admin')) {
+        await loadSuperAdminPanel();
       }
 
       const { data: houses, error: housesError } = await supabase
