@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c4265">
+  <meta name="description" content="Create and manage approved parish announcements and prayer-house events.">
+  <title>Announcements & Events Manager | Holy Family Youth Group</title>
+  <link rel="icon" href="holy-family-youth-group-logo.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="content-workspace.css">
+</head>
+<body>
+  <main class="auth-shell">
+    <div class="container content-workspace-container">
+      <header class="admin-topbar">
+        <a class="admin-brand" href="index.html">
+          <img src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
+          <span><strong>Holy Family Youth Group</strong><small>Announcements & events</small></span>
+        </a>
+        <div class="content-header-actions">
+          <a class="button button-light" href="announcements.html">Public announcements</a>
+          <a class="button button-light" href="events.html">Public events</a>
+          <button id="content-sign-out" class="button button-light" type="button">Sign out</button>
+        </div>
+      </header>
+
+      <div id="content-access-check" class="form-message info" role="status">Checking your administrator access…</div>
+      <section id="content-manager" hidden>
+        <div class="content-manager-intro">
+          <p class="eyebrow blue">PARISH COMMUNICATIONS</p>
+          <h1>Announcements & events</h1>
+          <p>Prepare updates for your assigned prayer house or the whole parish. Parish-level administrators review submissions before publication.</p>
+        </div>
+
+        <div class="content-manager-grid">
+          <section class="content-panel" aria-labelledby="create-content-title">
+            <div class="content-panel-heading">
+              <p class="eyebrow blue">CREATE CONTENT</p>
+              <h2 id="create-content-title">New announcement or event</h2>
+            </div>
+            <div id="content-form-status" class="form-message" role="status" aria-live="polite" hidden></div>
+            <form id="content-create-form" class="content-form">
+              <label>Content type
+                <select id="content-type" required>
+                  <option value="announcement">Announcement</option>
+                  <option value="event">Event</option>
+                </select>
+              </label>
+              <label>Publish to
+                <select id="content-scope" required>
+                  <option value="prayer_house">Prayer house</option>
+                  <option value="parish">Whole parish</option>
+                </select>
+              </label>
+              <label id="content-house-field">Prayer house
+                <select id="content-house" required></select>
+              </label>
+              <label>Title
+                <input id="content-title" type="text" minlength="3" maxlength="160" required placeholder="Give your update a clear title">
+              </label>
+              <label id="content-body-label">Message
+                <textarea id="content-body" rows="5" minlength="5" maxlength="12000" required placeholder="Write the announcement or event details…"></textarea>
+              </label>
+
+              <div id="announcement-fields" class="content-extra-fields">
+                <label class="content-checkbox"><input id="announcement-pinned" type="checkbox"> Pin this announcement after publication</label>
+                <label>Expiry date (optional)
+                  <input id="announcement-expires" type="datetime-local">
+                </label>
+              </div>
+
+              <div id="event-fields" class="content-extra-fields" hidden>
+                <label>Event date & start time
+                  <input id="event-starts" type="datetime-local">
+                </label>
+                <label>End date & time (optional)
+                  <input id="event-ends" type="datetime-local">
+                </label>
+                <label>Venue
+                  <input id="event-venue" type="text" maxlength="240" placeholder="Where will the event take place?">
+                </label>
+                <label>Event poster (optional, JPG / PNG / WebP, max 5 MB)
+                  <input id="event-poster" type="file" accept="image/jpeg,image/png,image/webp">
+                </label>
+              </div>
+
+              <div class="content-form-actions">
+                <button class="button button-light" type="button" data-save-status="draft">Save draft</button>
+                <button class="button" type="submit">Submit for approval</button>
+              </div>
+              <p class="content-form-note">Submitting sends your content to parish leadership for review. A draft is not visible to members.</p>
+            </form>
+          </section>
+
+          <section class="content-panel" aria-labelledby="review-queue-title">
+            <div class="content-panel-heading">
+              <p class="eyebrow blue">PARISH REVIEW</p>
+              <h2 id="review-queue-title">Approval queue</h2>
+              <p id="review-queue-description">Pending submissions will appear here for authorised parish reviewers.</p>
+            </div>
+            <div id="review-queue" class="content-record-list" aria-live="polite">
+              <div class="admin-empty">Loading submissions…</div>
+            </div>
+          </section>
+        </div>
+
+        <section class="content-panel content-own-submissions" aria-labelledby="own-content-title">
+          <div class="content-panel-heading content-panel-heading-row">
+            <div><p class="eyebrow blue">CONTENT TRACKER</p><h2 id="own-content-title">Your content & published updates</h2></div>
+            <button id="refresh-content" class="button button-light" type="button">Refresh</button>
+          </div>
+          <div id="own-content-list" class="content-record-list" aria-live="polite">
+            <div class="admin-empty">Loading your content…</div>
+          </div>
+        </section>
+        <p class="admin-footnote">House administrators can submit content only for their assigned prayer houses. Parish administrators and all four equal-authority Super Administrator offices can review and publish parish content. Every status change is audited.</p>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="content-workspace.js"></script>
+</body>
+</html>

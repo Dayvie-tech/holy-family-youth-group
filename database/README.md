@@ -77,3 +77,21 @@ Introduced an authenticated, role-checked leadership directory function for hous
 ## Migration 009 — safe prayer-house leadership names
 
 Adds a display-name snapshot to appointment records and populates existing rows. A private trigger fills the snapshot on new appointment claims and member reassignment. The trigger function is not executable by browser roles. House administrators can read the name snapshot only through appointment rows already limited by the existing appointment RLS policies. No public SECURITY DEFINER RPC is exposed.
+
+
+## Migration 010 — announcements and events
+
+Applied 7 November 2026. Adds prayer-house and parish announcements, events,
+an approval/publication workflow, a private audit trigger, and the public
+`community-posters` image bucket. House administrators may submit content
+only for their assigned house. Parish administrators and all four equal
+Super Administrator offices review submissions and publish approved items.
+Public visitors see parish-wide published items; approved members also see
+published items for their primary prayer house.
+
+## Migration 011 — content policy hardening
+
+Applied 7 November 2026. Narrows browser grants, combines each content table's
+update workflow into one RLS policy, and adds indexes for foreign-key lookups.
+The audit table is readable by parish-level administrators but cannot be
+written directly by browser clients; its private trigger records changes.

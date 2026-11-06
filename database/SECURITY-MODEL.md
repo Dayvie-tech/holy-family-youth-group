@@ -51,3 +51,15 @@ Before enabling member-facing features, test with separate test accounts:
 ## Prayer-house leadership directory
 
 The member-facing name shown in a prayer-house leadership roster is stored as a display-name snapshot on the appointment row by a private trigger. This avoids granting house administrators access to unrelated profile fields such as private phone numbers. The roster reads verified appointment rows under the existing house-scoped RLS policy. The trigger function is private and not directly executable by browser roles.
+
+
+## Announcements and events
+
+- House administrators may create and submit content only for their active assigned prayer houses.
+- Parish administrators and the four equal Super Administrator offices may create parish-wide content, review submissions, and publish approved items.
+- Authors cannot approve their own submissions.
+- Authors can edit only their own draft or rejected content; content ownership and audience are immutable after creation.
+- Members see only published parish-wide content and published content for their primary prayer house. Anonymous visitors see parish-wide published content only.
+- Poster uploads are restricted to approved administrators, stored under the uploader's own folder, limited to JPG, PNG, and WebP, and capped at 5 MB.
+- A private trigger writes status and edit activity to `community_content_activity`. Browser roles cannot insert or update audit rows directly.
+- New public-schema tables receive explicit grants as well as RLS policies; never rely on project-wide default grants.
