@@ -32,3 +32,17 @@ This is the identity/authority foundation, not a complete application backend. I
 3. Read the migration and confirm the eight prayer-house names.
 4. Apply it in the Supabase SQL Editor.
 5. Test with separate accounts for a normal member, a prayer-house administrator, a parish administrator and each Super Administrator office.
+
+## Initial administrator bootstrap
+There is intentionally no public self-service route for creating Super Administrator assignments. On a brand-new project, the project owner must first create/verify the four designated administrator Auth accounts, provision their matching profile rows through the trusted setup process, and then create one active `admin_assignments` row for each account with `access_level = 'super_admin'` and the correct `super_admin_office` label. This one-time bootstrap must be performed by the project owner using the Supabase SQL Editor or a protected server-side setup action, never by exposing the service-role key in the website. Keep a record of who authorised the initial assignments.
+
+Until at least one Super Administrator assignment exists, the admin-management policies intentionally allow no browser account to grant itself administrative access. This prevents privilege escalation but means the initial four accounts must be provisioned out-of-band.
+
+## Initial test matrix
+Before enabling member-facing features, test with separate test accounts:
+- Unapproved member: can see only their own profile and appointment claim.
+- Approved member: gains only the member capabilities defined by later module policies.
+- Prayer-house administrator: can manage only their assigned house.
+- Parish administrator: can perform parish-wide operational tasks but cannot alter Super Administrator assignments.
+- Each of the four Super Administrator offices: receives the same system permissions.
+- Suspended member: cannot use member-only functions, while their history and audit records remain intact.
