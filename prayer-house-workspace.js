@@ -77,7 +77,8 @@ async function loadWorkspace(user) {
       .order('office_name');
     if (leadersError) throw leadersError;
 
-    const today = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
     const activeLeaders = (leaders || []).filter((leader) =>
       (!leader.effective_from || leader.effective_from <= today) &&
       (!leader.effective_until || leader.effective_until >= today)
