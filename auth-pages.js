@@ -465,11 +465,6 @@ async function setupAdminDashboard() {
         window.location.replace('member-dashboard.html');
         return;
       }
-      if (assignments.every((assignment) => assignment.access_level === 'prayer_house_admin')) {
-        window.location.replace('prayer-house-workspace.html');
-        return;
-      }
-
       if (assignments.some((assignment) => assignment.access_level === 'super_admin')) {
         await loadSuperAdminPanel();
       }
