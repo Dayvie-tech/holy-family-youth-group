@@ -11,7 +11,7 @@
 
 ## Required Supabase URL configuration
 
-Before testing the registration page on GitHub Pages, configure:
+After the feature is approved for deployment to the GitHub Pages `main` branch, configure the following URLs before enabling public registration:
 
 - Site URL: `https://dayvie-tech.github.io/holy-family-youth-group/`
 - Allowed redirect URL: `https://dayvie-tech.github.io/holy-family-youth-group/auth-callback.html`
