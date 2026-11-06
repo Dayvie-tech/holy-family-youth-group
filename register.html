@@ -1,1 +1,78 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Registration | Holy Family Youth Group</title><link rel="stylesheet" href="styles.css"></head><body><main class="section"><div class="container" style="max-width:620px"><a class="text-link" href="index.html">← Back to home</a><div class="content-card" style="margin-top:20px"><p class="eyebrow blue">BECOME PART OF THE COMMUNITY</p><h2>Member registration</h2><p>Registration will collect the required member details and prayer-house selection. Submitted applications will require administrator approval before full member access.</p><div class="placeholder-note">The secure registration form and approval workflow will be implemented after the database and authentication foundation are ready.</div></div></div></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Member registration | Holy Family Youth Group</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+  <main class="auth-shell">
+    <div class="container">
+      <a class="text-link auth-back" href="index.html">← Back to home</a>
+      <section class="auth-card">
+        <img class="auth-logo" src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
+        <header class="auth-heading">
+          <p class="eyebrow blue">BECOME PART OF THE COMMUNITY</p>
+          <h1>Member registration</h1>
+          <p>Create your account and join your prayer house.</p>
+        </header>
+        <div class="auth-note">Email verification is required. After verifying your email, your membership will remain pending until an authorized administrator approves it.</div>
+        <form id="registration-form" class="auth-form" novalidate>
+          <label>Full name
+            <input id="full-name" name="full_name" type="text" autocomplete="name" maxlength="120" required placeholder="Enter your full name">
+          </label>
+          <label>Email address
+            <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
+          </label>
+          <label>Phone number
+            <input id="phone" name="phone" type="tel" autocomplete="tel" required maxlength="30" placeholder="e.g. 07XXXXXXXX">
+            <small>Your phone number is private and will not appear in the public member directory.</small>
+          </label>
+          <label>Prayer house
+            <select id="prayer-house" name="prayer_house_id" required>
+              <option value="">Choose your prayer house</option>
+              <option value="1">Holy Family Nguviu</option>
+              <option value="2">Sacred Heart Kangenge</option>
+              <option value="3">Our Lady of Assumption Gicherori</option>
+              <option value="4">St. Charles Kibugu</option>
+              <option value="5">St. John Chrysostom Kathangariri</option>
+              <option value="6">Our Lady of Visitation Kianguchu</option>
+              <option value="7">St. Ruth Kathakwa</option>
+              <option value="8">St. Joseph Gatunduri</option>
+            </select>
+          </label>
+          <div class="auth-divider"></div>
+          <p class="eyebrow blue" style="margin:0">OPTIONAL LEADERSHIP CLAIM</p>
+          <label>Leadership level
+            <select id="claim-scope" name="claim_scope">
+              <option value="">I am registering as an ordinary member</option>
+              <option value="prayer_house">Prayer-house leadership</option>
+              <option value="parish">Parish leadership</option>
+            </select>
+          </label>
+          <label>Office being claimed
+            <select id="claim-office" name="claim_office" disabled>
+              <option value="">Select an office (optional)</option>
+            </select>
+          </label>
+          <small id="claim-note" class="auth-help">You can register as an ordinary member without claiming a leadership office.</small>
+          <div class="auth-divider"></div>
+          <label>Password
+            <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters">
+          </label>
+          <label>Confirm password
+            <input id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" required placeholder="Enter the password again">
+          </label>
+          <div id="registration-message" class="form-message" role="status" aria-live="polite" hidden></div>
+          <button id="register-submit" class="button" type="submit">Create membership account</button>
+        </form>
+        <div class="auth-divider"></div>
+        <p class="auth-foot">Already registered? <a class="text-link" href="login.html">Sign in</a></p>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="auth-pages.js"></script>
+</body>
+</html>
