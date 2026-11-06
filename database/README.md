@@ -48,3 +48,18 @@ The Supabase project `holy-family-youth-group` has been created. Three migration
 - Give the four Super Administrator offices equal permissions.
 - Keep individual contribution records private.
 - Never store a service-role key in browser code.
+
+
+## Migration 004 — audited membership review
+
+Applied on 7 November 2026. Adds `admin_activity_log` and the
+`public.review_membership(uuid, text)` RPC. The RPC currently supports
+approval only, checks that the caller is a parish-level administrator or the
+applicant's prayer-house administrator, and writes an audit record. Browser
+clients cannot update `profiles.membership_status` directly. The admin review
+page is a separate route at `admin-dashboard.html`.
+
+The first Super Administrator must still be bootstrapped manually and
+deliberately after the intended account has completed email verification.
+Do not create public signup fields or policies that allow users to assign
+themselves administrative access.
