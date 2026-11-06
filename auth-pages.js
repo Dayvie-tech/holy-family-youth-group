@@ -20,7 +20,16 @@ async function membershipDestination(user) {
     throw new Error('Your account was verified, but the member profile could not be loaded. Please contact the parish portal administrator.');
   }
   if (data.membership_status === 'approved') {
-    window.location.replace('member-dashboard.html');
+    const { data: assignments } = await supabase
+      .from('admin_assignments')
+      .select('access_level')
+      .eq('user_id', user.id)
+      .eq('is_active', true);
+    if (assignments?.length) {
+      window.location.replace('admin-dashboard.html');
+    } else {
+      window.location.replace('member-dashboard.html');
+    }
     return;
   }
   if (data.membership_status === 'suspended') {
@@ -250,3 +259,120 @@ setupCallback();
 setupProtectedPage();
 setupPendingPage();
 setupSignOut();
+
+
+async function setupAdminDashboard() {
+  const page = $('admin-page');
+  if (!page) return;
+
+  const status = $('admin-status');
+  const list = $('application-list');
+  const count = $('application-count');
+  const reload = $('reload-applications');
+
+  const showAdminError = (message) => showMessage(status, message, 'error');
+
+  async function loadApplications() {
+    status.hidden = true;
+    list.innerHTML = '';
+    list.setAttribute('aria-busy', 'true');
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+      if (!user) {
+        window.location.replace('login.html');
+        return;
+      }
+
+      const { data: assignments, error: assignmentError } = await supabase
+        .from('admin_assignments')
+        .select('access_level, prayer_house_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+      if (assignmentError) throw assignmentError;
+      if (!assignments?.length) {
+        window.location.replace('member-dashboard.html');
+        return;
+      }
+
+      const { data: houses, error: housesError } = await supabase
+        .from('prayer_houses')
+        .select('id, name');
+      if (housesError) throw housesError;
+      const houseNames = new Map((houses || []).map((house) => [house.id, house.name]));
+
+      const { data: applications, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, phone_private, primary_prayer_house_id, created_at')
+        .eq('membership_status', 'pending')
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+
+      count.textContent = String(applications?.length || 0);
+      if (!applications?.length) {
+        list.innerHTML = '<div class="admin-empty">There are no pending membership applications.</div>';
+        return;
+      }
+
+      applications.forEach((application) => {
+        const card = document.createElement('article');
+        card.className = 'application-card';
+
+        const heading = document.createElement('div');
+        heading.className = 'application-heading';
+        const name = document.createElement('h2');
+        name.textContent = application.full_name;
+        const house = document.createElement('span');
+        house.className = 'application-house';
+        house.textContent = houseNames.get(application.primary_prayer_house_id) || 'Prayer house not selected';
+        heading.append(name, house);
+
+        const meta = document.createElement('p');
+        meta.className = 'application-meta';
+        const phone = application.phone_private || 'No phone supplied';
+        const date = new Date(application.created_at).toLocaleDateString();
+        meta.textContent = phone + ' · Registered ' + date;
+
+        const actions = document.createElement('div');
+        actions.className = 'application-actions';
+        const approve = document.createElement('button');
+        approve.type = 'button';
+        approve.className = 'button';
+        approve.textContent = 'Approve membership';
+        approve.addEventListener('click', async () => {
+          approve.disabled = true;
+          approve.textContent = 'Approving…';
+          try {
+            const { error: reviewError } = await supabase.rpc('review_membership', {
+              target_member_id: application.id,
+              decision: 'approve'
+            });
+            if (reviewError) throw reviewError;
+            card.remove();
+            count.textContent = String(Math.max(0, Number(count.textContent) - 1));
+            if (!list.querySelector('.application-card')) {
+              list.innerHTML = '<div class="admin-empty">There are no pending membership applications.</div>';
+            }
+            showMessage(status, application.full_name + ' has been approved.', 'success');
+          } catch (reviewError) {
+            showAdminError(reviewError.message || 'The application could not be approved.');
+            approve.disabled = false;
+            approve.textContent = 'Approve membership';
+          }
+        });
+        actions.append(approve);
+        card.append(heading, meta, actions);
+        list.append(card);
+      });
+    } catch (error) {
+      showAdminError(error.message || 'Unable to load membership applications.');
+    } finally {
+      list.setAttribute('aria-busy', 'false');
+    }
+  }
+
+  reload?.addEventListener('click', loadApplications);
+  await loadApplications();
+}
+
+setupAdminDashboard();
