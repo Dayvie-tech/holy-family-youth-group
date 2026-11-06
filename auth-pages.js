@@ -22,11 +22,12 @@ async function membershipDestination(user) {
   if (data.membership_status === 'approved') {
     const { data: assignments } = await supabase
       .from('admin_assignments')
-      .select('access_level')
+      .select('access_level, prayer_house_id')
       .eq('user_id', user.id)
       .eq('is_active', true);
     if (assignments?.length) {
-      window.location.replace('admin-dashboard.html');
+      const houseOnly = assignments.every((assignment) => assignment.access_level === 'prayer_house_admin');
+      window.location.replace(houseOnly ? 'prayer-house-workspace.html' : 'admin-dashboard.html');
     } else {
       window.location.replace('member-dashboard.html');
     }
@@ -464,7 +465,6 @@ async function setupAdminDashboard() {
         window.location.replace('member-dashboard.html');
         return;
       }
-
       if (assignments.some((assignment) => assignment.access_level === 'super_admin')) {
         await loadSuperAdminPanel();
       }

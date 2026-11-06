@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c4265">
+  <meta name="description" content="Prayer-house administrator workspace for Holy Family Youth Group.">
+  <title>Prayer-house workspace | Holy Family Youth Group</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="prayer-house-workspace.css">
+</head>
+<body>
+  <main class="auth-shell">
+    <div class="container house-workspace-container">
+      <header class="admin-topbar">
+        <a class="admin-brand" href="index.html">
+          <img src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
+          <span><strong>Holy Family Youth Group</strong><small>Prayer-house administration</small></span>
+        </a>
+        <div class="workspace-header-actions">
+          <a class="button button-light" href="admin-dashboard.html">Membership & claims</a>
+          <button id="sign-out" class="button button-light" type="button">Sign out</button>
+        </div>
+      </header>
+
+      <section id="house-workspace" class="house-workspace" hidden>
+        <div class="workspace-intro">
+          <p class="eyebrow blue">LOCAL LEADERSHIP & OPERATIONS</p>
+          <h1>Prayer-house workspace</h1>
+          <p>Welcome, <strong id="workspace-admin-name">Administrator</strong>. Manage the leadership information for the prayer house or houses assigned to you.</p>
+        </div>
+
+        <div class="workspace-summary">
+          <div><span class="summary-label">Your assigned prayer houses</span><strong id="assigned-house-count">—</strong></div>
+          <button id="refresh-house-workspace" class="button button-light" type="button">Refresh workspace</button>
+        </div>
+
+        <div id="workspace-status" class="form-message" role="status" aria-live="polite" hidden></div>
+        <section aria-labelledby="house-directory-title">
+          <div class="workspace-section-heading">
+            <h2 id="house-directory-title">Your prayer houses</h2>
+            <p>Only houses assigned to your administrator account appear here.</p>
+          </div>
+          <div id="assigned-house-list" class="assigned-house-list" aria-live="polite">
+            <div class="admin-empty">Loading your assigned prayer houses…</div>
+          </div>
+        </section>
+
+        <section class="workspace-next-steps" aria-labelledby="workspace-tools-title">
+          <div>
+            <p class="eyebrow blue">ADMINISTRATION TOOLS</p>
+            <h2 id="workspace-tools-title">Membership & leadership claims</h2>
+            <p>Review membership applications and verify or reject leadership claims within your assigned house. These decisions remain separate.</p>
+          </div>
+          <a class="button" href="admin-dashboard.html">Open membership & claims</a>
+        </section>
+
+        <p class="admin-footnote">House administrators cannot appoint administrators or access another prayer house's private records. Parish-wide approvals and governance remain with the authorised parish and Super Administrators.</p>
+      </section>
+
+      <div id="house-workspace-loading" class="admin-empty">Checking your administrator access…</div>
+    </div>
+  </main>
+  <script type="module" src="prayer-house-workspace.js"></script>
+</body>
+</html>

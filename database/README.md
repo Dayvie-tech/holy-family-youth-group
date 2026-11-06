@@ -68,3 +68,12 @@ themselves administrative access.
 ## Migration 005 — least-privilege approval
 
 Replaces the exposed review RPC with a narrow column-level update grant and an RLS policy that permits only an authorised administrator to move a pending profile to approved. A private trigger records the approval in the audit log. Browser clients cannot update profile names, contact details, house assignments, or other profile fields through this policy.
+
+
+## Migration 008 — initial prayer-house leadership directory RPC
+
+Introduced an authenticated, role-checked leadership directory function for house administrators. It was superseded immediately by migration 009 before any client release because the public SECURITY DEFINER RPC generated a Security Advisor warning.
+
+## Migration 009 — safe prayer-house leadership names
+
+Adds a display-name snapshot to appointment records and populates existing rows. A private trigger fills the snapshot on new appointment claims and member reassignment. The trigger function is not executable by browser roles. House administrators can read the name snapshot only through appointment rows already limited by the existing appointment RLS policies. No public SECURITY DEFINER RPC is exposed.

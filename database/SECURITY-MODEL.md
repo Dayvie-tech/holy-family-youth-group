@@ -46,3 +46,8 @@ Before enabling member-facing features, test with separate test accounts:
 - Parish administrator: can perform parish-wide operational tasks but cannot alter Super Administrator assignments.
 - Each of the four Super Administrator offices: receives the same system permissions.
 - Suspended member: cannot use member-only functions, while their history and audit records remain intact.
+
+
+## Prayer-house leadership directory
+
+The member-facing name shown in a prayer-house leadership roster is stored as a display-name snapshot on the appointment row by a private trigger. This avoids granting house administrators access to unrelated profile fields such as private phone numbers. The roster reads verified appointment rows under the existing house-scoped RLS policy. The trigger function is private and not directly executable by browser roles.
