@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c4265">
+  <title>Membership review | Holy Family Youth Group</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="admin-dashboard.css">
+</head>
+<body>
+  <main class="auth-shell">
+    <div class="container admin-container">
+      <header class="admin-topbar">
+        <a class="admin-brand" href="index.html">
+          <img src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
+          <span><strong>Holy Family Youth Group</strong><small>Administration workspace</small></span>
+        </a>
+        <button id="sign-out" class="button button-light" type="button">Sign out</button>
+      </header>
+
+      <section id="admin-page" class="admin-workspace">
+        <div class="admin-intro">
+          <p class="eyebrow blue">MEMBERSHIP MANAGEMENT</p>
+          <h1>Registration applications</h1>
+          <p>Review new member applications for the parish or your assigned prayer house.</p>
+        </div>
+
+        <div class="admin-summary">
+          <div><span class="summary-label">Pending applications</span><strong id="application-count">—</strong></div>
+          <button id="reload-applications" class="button button-light" type="button">Refresh list</button>
+        </div>
+
+        <div id="admin-status" class="form-message" role="status" aria-live="polite" hidden></div>
+        <div id="application-list" class="application-list" aria-live="polite">
+          <div class="admin-empty">Loading membership applications…</div>
+        </div>
+        <p class="admin-footnote">Membership approval grants member-portal access. Any leadership office claimed during registration must be verified separately.</p>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="auth-pages.js"></script>
+</body>
+</html>

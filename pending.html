@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Membership pending | Holy Family Youth Group</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+  <main class="auth-shell">
+    <div class="container">
+      <section id="pending-page" class="auth-card narrow" hidden>
+        <img class="auth-logo" src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
+        <div class="pending-mark" aria-hidden="true">✓</div>
+        <header class="auth-heading">
+          <p class="eyebrow blue">APPLICATION RECEIVED</p>
+          <h1>Awaiting approval</h1>
+          <p>Hello <strong id="pending-name">Member</strong>. Your email is verified.</p>
+        </header>
+        <div class="auth-note">Your membership application is awaiting review by an authorized parish administrator. Full member-portal access will be available after approval. If you submitted a leadership claim, that appointment will be verified separately.</div>
+        <div id="pending-message" class="form-message" role="status" aria-live="polite" hidden></div>
+        <div class="auth-divider"></div>
+        <button id="sign-out" class="button" type="button">Sign out</button>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="auth-pages.js"></script>
+</body>
+</html>

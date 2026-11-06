@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Member portal | Holy Family Youth Group</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+  <main class="auth-shell">
+    <div class="container">
+      <div id="access-check" class="form-message auth-card" role="status" aria-live="polite">Checking your member access…</div>
+      <section id="protected-page" class="auth-card" hidden>
+        <img class="auth-logo" src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
+        <header class="auth-heading">
+          <p class="eyebrow blue">HOLY FAMILY YOUTH GROUP</p>
+          <h1>Member portal</h1>
+          <p>Welcome, <strong id="member-name">Member</strong>.</p>
+          <p id="member-house" class="auth-help"></p>
+        </header>
+        <div class="auth-note">Your membership is approved. This is the secure entry point for the member area. Events, chat, Youth Voice and other member modules will be connected in their own pages as the project progresses.</div>
+        <div class="auth-divider"></div>
+        <a class="button button-light" href="index.html">Public homepage</a>
+        <button id="sign-out" class="button" type="button">Sign out</button>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="auth-pages.js"></script>
+</body>
+</html>
