@@ -52,20 +52,37 @@
         </section>
         <div class="admin-intro">
           <p class="eyebrow blue">MEMBERSHIP MANAGEMENT</p>
-          <h1>Registration applications</h1>
-          <p>Review new member applications for the parish or your assigned prayer house.</p>
+          <h1>Administration workspace</h1>
+          <p>Review membership applications and leadership appointments within your authorized area.</p>
         </div>
 
         <div class="admin-summary">
-          <div><span class="summary-label">Pending applications</span><strong id="application-count">—</strong></div>
-          <button id="reload-applications" class="button button-light" type="button">Refresh list</button>
+          <div><span class="summary-label">Pending membership applications</span><strong id="application-count">—</strong></div>
+          <button id="reload-applications" class="button button-light" type="button">Refresh workspace</button>
         </div>
 
         <div id="admin-status" class="form-message" role="status" aria-live="polite" hidden></div>
-        <div id="application-list" class="application-list" aria-live="polite">
-          <div class="admin-empty">Loading membership applications…</div>
-        </div>
-        <p class="admin-footnote">Membership approval grants member-portal access. Any leadership office claimed during registration must be verified separately.</p>
+        <section aria-labelledby="applications-title">
+          <div class="admin-section-heading">
+            <h2 id="applications-title">Membership applications</h2>
+            <p>Approve new members for the parish or your assigned prayer house.</p>
+          </div>
+          <div id="application-list" class="application-list" aria-live="polite">
+            <div class="admin-empty">Loading membership applications…</div>
+          </div>
+        </section>
+
+        <section class="claim-review-section" aria-labelledby="claims-title">
+          <div class="admin-section-heading">
+            <h2 id="claims-title">Leadership appointment claims</h2>
+            <p>Verify or reject leadership offices claimed by members. House administrators only see claims for their assigned house.</p>
+          </div>
+          <div id="appointment-claim-status" class="form-message" role="status" aria-live="polite" hidden></div>
+          <div id="appointment-claim-list" class="application-list" aria-live="polite">
+            <div class="admin-empty">Loading leadership claims…</div>
+          </div>
+        </section>
+        <p class="admin-footnote">Membership approval and leadership appointment verification are separate decisions. Every appointment review is recorded in the administration activity log.</p>
       </section>
     </div>
   </main>
