@@ -85,8 +85,16 @@ function setupRegistration() {
     const claimScope = scope.value;
     const claimOffice = office.value;
 
-    if (password.length < 8) {
-      showMessage(message, 'Use a password with at least 8 characters.', 'error');
+    const allowedSymbols = "!@#$%^&*()_+-=[]{};':\"\\|<>?,./`~";
+    const passwordIsStrong =
+      password.length >= 12 &&
+      /[a-z]/.test(password) &&
+      /[A-Z]/.test(password) &&
+      /[0-9]/.test(password) &&
+      [...allowedSymbols].some((character) => password.includes(character));
+
+    if (!passwordIsStrong) {
+      showMessage(message, 'Use at least 12 characters, with uppercase and lowercase letters, a number and a symbol.', 'error');
       return;
     }
     if (password !== confirmPassword) {
