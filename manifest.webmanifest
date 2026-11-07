@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "Holy Family Youth Group",
+  "short_name": "Holy Family",
+  "description": "The digital home of Holy Family Youth Group, Nguviu. Faith, community and service.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f8fb",
+  "theme_color": "#168fc9",
+  "icons": [
+    {
+      "src": "./holy-family-youth-group-logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "1536x1536",
+      "purpose": "any"
+    }
+  ]
+}
