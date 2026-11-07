@@ -1,4 +1,6 @@
-import { supabase, authCallbackUrl } from './auth-client.js';
+// Load the Supabase client inside the bootstrap so startup failures can be shown on the page.
+let supabase;
+let authCallbackUrl;
 
 const $ = (id) => document.getElementById(id);
 const showMessage = (element, message, type = 'info') => {
@@ -329,12 +331,40 @@ function setupSignOut() {
   });
 }
 
-setupRegistration();
-setupLogin();
-setupCallback();
-setupProtectedPage();
-setupPendingPage();
-setupSignOut();
+async function initialiseAuthPages() {
+  try {
+    const authClient = await import('./auth-client.js');
+    supabase = authClient.supabase;
+    authCallbackUrl = authClient.authCallbackUrl;
+
+    setupRegistration();
+    setupLogin();
+    setupCallback();
+    setupProtectedPage();
+    setupPendingPage();
+    setupSignOut();
+    await setupAdminDashboard();
+  } catch (error) {
+    console.error('Portal authentication initialisation failed:', error);
+    const message = $('login-message') || $('callback-status') || $('access-check')
+      || $('pending-message') || $('admin-status');
+    if (message) {
+      showMessage(
+        message,
+        'The sign-in service could not initialise: ' + (error?.message || 'Unknown startup error')
+          + '. Check your connection and reload the page. If this continues, contact the portal administrator.',
+        'error'
+      );
+    }
+    const submit = $('login-submit');
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = 'Service unavailable';
+    }
+  }
+}
+
+initialiseAuthPages();
 
 
 async function setupAdminDashboard() {
@@ -679,8 +709,6 @@ async function setupAdminDashboard() {
   reload?.addEventListener('click', loadApplications);
   await loadApplications();
 }
-
-setupAdminDashboard();
 
 // Keep notifications available on authenticated dashboard and administration pages.
 import('./notifications.js').catch((error) => console.warn('Notification centre unavailable:', error));
