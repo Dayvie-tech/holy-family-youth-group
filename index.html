@@ -42,7 +42,9 @@
         <a href="youth-voice.html">Youth Voice</a>
         <a href="history.html">History</a><a href="gallery.html">Gallery</a><a href="chat.html">Chat</a>
         <a href="contact.html">Contact</a>
-        <a class="nav-login" href="login.html">Member login</a>
+        <a id="home-login-link" class="nav-login" href="login.html">Member login</a>
+        <a id="home-dashboard-link" class="nav-login" href="member-dashboard.html" hidden>My dashboard</a>
+        <a id="home-sign-out-link" class="nav-login" href="#" hidden>Sign out</a>
       </nav>
     </div>
   </header>
@@ -58,7 +60,8 @@
           <p class="hero-motto">“I WILL NOT REST TILL CHRIST IS KNOWN TO ALL.”</p>
           <div class="hero-actions">
             <a class="button button-light" href="about.html">Discover our community <span>→</span></a>
-            <a class="button button-outline" href="register.html">Join the youth group</a>
+            <a id="hero-register-link" class="button button-outline" href="register.html">Join the youth group</a>
+            <a id="hero-dashboard-link" class="button button-outline" href="member-dashboard.html" hidden>Open my dashboard →</a>
           </div>
         </div>
         <div class="hero-emblem-wrap">
@@ -156,6 +159,7 @@
     <div class="footer-bottom"><div class="container">© <span id="current-year"></span> Holy Family Youth Group. All rights reserved. <span>Faith · Community · Service</span></div></div>
   </footer>
   <script src="app.js"></script>
+  <script type="module" src="home-auth-nav.js"></script>
   <script src="pwa-register.js"></script>
 </body>
 </html>
