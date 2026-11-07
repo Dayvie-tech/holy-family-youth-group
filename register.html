@@ -138,6 +138,81 @@
       </section>
     </div>
   </main>
+  <script>
+    // Keep registration role fields interactive even if the Supabase module/CDN is temporarily unavailable.
+    (() => {
+      const byId = (id) => document.getElementById(id);
+      const role = byId('registration-role');
+      const scope = byId('claim-scope');
+      const office = byId('claim-office');
+      if (!role || !scope || !office) return;
+
+      const offices = [
+        'Chairperson', 'Vice Chairperson', 'Secretary', 'Vice Secretary',
+        'Treasurer', 'Organizing Secretary', 'Project Manager',
+        'Assistant Project Manager', 'Games Coordinator', 'Catechist'
+      ];
+      const descriptions = {
+        member: 'Register as an ordinary member of the youth group.',
+        prayer_house_leader: 'Apply for a leadership office in your selected prayer house. Your application will be reviewed.',
+        parish_leader: 'Apply for a parish-wide leadership office. Your application will be reviewed.',
+        patron: 'Submit an application for the Patron appointment at parish or prayer-house level.',
+        matron: 'Submit an application for the Matron appointment at parish or prayer-house level.',
+        chaplain: 'Apply for the single Parish Chaplain appointment. Applicants must be male and select Father or Deacon.'
+      };
+
+      function updateRoleFields() {
+        const selected = role.value;
+        const houseLeader = selected === 'prayer_house_leader';
+        const parishLeader = selected === 'parish_leader';
+        const chaplain = selected === 'chaplain';
+        const patronMatron = selected === 'patron' || selected === 'matron';
+
+        byId('leadership-fields').hidden = !(houseLeader || parishLeader);
+        byId('chaplain-fields').hidden = !chaplain;
+        byId('patron-matron-fields').hidden = !patronMatron;
+        byId('prayer-house-field').hidden = chaplain;
+        byId('prayer-house').required = !chaplain;
+        if (chaplain) byId('prayer-house').value = '';
+
+        scope.value = houseLeader ? 'prayer_house' : parishLeader ? 'parish' : '';
+        scope.disabled = true;
+        office.replaceChildren();
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = (houseLeader || parishLeader) ? 'Choose a leadership office' : 'Select a leadership role first';
+        office.append(placeholder);
+        if (houseLeader || parishLeader) {
+          [...offices, 'Patron', 'Matron'].forEach((name) => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            office.append(option);
+          });
+        }
+        office.disabled = !(houseLeader || parishLeader);
+        office.required = houseLeader || parishLeader;
+
+        byId('patron-claim-scope').value = selected === 'patron' ? 'parish' : '';
+        byId('matron-claim-scope').value = selected === 'matron' ? 'parish' : '';
+        byId('patron-claim-scope').required = selected === 'patron';
+        byId('matron-claim-scope').required = selected === 'matron';
+
+        byId('gender-field').hidden = !chaplain;
+        byId('member-gender').required = chaplain;
+        byId('member-gender').value = chaplain ? 'male' : '';
+        byId('member-gender').disabled = chaplain;
+        byId('chaplain-title').required = chaplain;
+        if (!chaplain) byId('chaplain-title').value = '';
+        byId('chaplain-claim').value = chaplain ? 'parish' : '';
+        byId('chaplain-claim').disabled = true;
+        byId('role-description').textContent = descriptions[selected] || descriptions.member;
+      }
+
+      role.addEventListener('change', updateRoleFields);
+      updateRoleFields();
+    })();
+  </script>
   <script type="module" src="auth-pages.js"></script>
 </body>
 </html>
