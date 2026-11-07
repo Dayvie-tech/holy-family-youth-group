@@ -10,6 +10,7 @@ let currentUser = null;
 let rows = [];
 let channel = null;
 let panelOpen = false;
+let button, badge, panel, list, markAllButton, toast;
 
 const make = (tag, className, text) => {
   const node = document.createElement(tag);
