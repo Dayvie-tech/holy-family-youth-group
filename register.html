@@ -19,15 +19,22 @@
           <p>Register as a member or submit an appointment application.</p>
         </header>
         <div class="auth-note">Email verification is required. After verifying your email, your membership will remain pending until an authorized administrator approves it.</div>
-        <section class="chaplain-registration-card" aria-labelledby="chaplain-registration-title">
-          <p class="eyebrow blue">DEDICATED APPOINTMENT REGISTRATION</p>
-          <h2 id="chaplain-registration-title">Parish Chaplain Registration</h2>
-          <p>Are you applying for the single Parish Chaplain position? Start here, then enter your personal details, contact information, prayer house and account password in the registration form below.</p>
-          <ul><li>One Parish Chaplain position is available.</li><li>The applicant must be male.</li><li>The appointment is reviewed and verified separately by authorized parish leadership.</li><li>This appointment does not provide Super Admin access.</li></ul>
-          <button id="chaplain-registration-start" class="button" type="button">Start Parish Chaplain Registration ↓</button>
-        </section>
+
         <form id="registration-form" class="auth-form" novalidate>
-          <p class="eyebrow blue registration-details-heading">PERSONAL DETAILS</p>
+          <p class="eyebrow blue registration-details-heading">START YOUR REGISTRATION</p>
+          <label>Register as
+            <select id="registration-role" name="registration_role" required>
+              <option value="member">Ordinary Member</option>
+              <option value="prayer_house_leader">Prayer House Leader</option>
+              <option value="parish_leader">Parish Leader</option>
+              <option value="patron">Patron</option>
+              <option value="matron">Matron</option>
+              <option value="chaplain">Chaplain</option>
+            </select>
+          </label>
+          <p id="role-description" class="auth-help" aria-live="polite">Register as an ordinary member of the youth group.</p>
+          <div class="auth-divider"></div>
+          <p class="eyebrow blue registration-details-heading">PERSONAL INFORMATION</p>
           <label>Full name
             <input id="full-name" name="full_name" type="text" autocomplete="name" maxlength="120" required placeholder="Enter your full name">
           </label>
@@ -51,8 +58,9 @@
               <option value="8">St. Joseph Gatunduri</option>
             </select>
           </label>
+          <div id="leadership-fields" hidden>
           <div class="auth-divider"></div>
-          <p class="eyebrow blue" style="margin:0">OPTIONAL LEADERSHIP CLAIM</p>
+          <p class="eyebrow blue" style="margin:0">LEADERSHIP DETAILS</p>
           <label>Leadership level
             <select id="claim-scope" name="claim_scope">
               <option value="">I am registering as an ordinary member</option>
@@ -66,24 +74,35 @@
             </select>
           </label>
           <small id="claim-note" class="auth-help">You can register as an ordinary member without claiming a leadership office.</small>
+          </div>
+          <div id="chaplain-fields" hidden>
           <div class="auth-divider"></div>
-          <p class="eyebrow blue" style="margin:0">OPTIONAL PARISH CHAPLAIN APPOINTMENT</p>
-          <p class="auth-help">There is one Parish Chaplain slot. Only male members may submit a Chaplain claim, and the appointment must be verified separately. It does not grant Super Admin access.</p>
+          <p class="eyebrow blue" style="margin:0">CHAPLAIN DETAILS</p>
+          <p class="auth-help">The Parish Chaplain must be male and must select the appropriate Roman Catholic Church title. The appointment is subject to verification and does not grant Super Admin access.</p>
           <label>Parish Chaplain appointment
             <select id="chaplain-claim" name="chaplain_claim">
               <option value="">Not claiming Parish Chaplain</option>
               <option value="parish">I am claiming the Parish Chaplain slot</option>
             </select>
           </label>
-          <label id="gender-field" hidden>Gender (required for a Chaplain claim)
+          <label id="gender-field">Gender (Chaplain applicants must be male)
             <select id="member-gender" name="gender">
               <option value="">Select gender</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
           </label>
+          <label id="chaplain-title-field">Church title
+            <select id="chaplain-title" name="chaplain_title">
+              <option value="">Select title</option>
+              <option value="Father">Father</option>
+              <option value="Deacon">Deacon</option>
+            </select>
+          </label>
+          </div>
+          <div id="patron-matron-fields" hidden>
           <div class="auth-divider"></div>
-          <p class="eyebrow blue" style="margin:0">OPTIONAL PATRON &amp; MATRON APPOINTMENT</p>
+          <p class="eyebrow blue" style="margin:0">APPOINTMENT DETAILS</p>
           <p class="auth-help">If you currently serve as a Patron or Matron, you may submit the relevant appointment claim(s). Parish and prayer-house claims are verified separately. These appointments do not grant Super Admin access.</p>
           <label>Patron appointment
             <select id="patron-claim-scope" name="patron_claim_scope">
@@ -102,6 +121,7 @@
             </select>
           </label>
           <small class="auth-help">Each parish position has one slot, and each prayer house has one Patron and one Matron slot. Claims are subject to verification.</small>
+          </div>
           <div class="auth-divider"></div>
           <label>Password
             <input id="password" name="password" type="password" autocomplete="new-password" minlength="12" required placeholder="Create a strong password">
@@ -111,7 +131,7 @@
             <input id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="12" required placeholder="Enter the password again">
           </label>
           <div id="registration-message" class="form-message" role="status" aria-live="polite" hidden></div>
-          <button id="register-submit" class="button" type="submit">Create membership account</button>
+          <button id="register-submit" class="button" type="submit">Submit registration</button>
         </form>
         <div class="auth-divider"></div>
         <p class="auth-foot">Already registered? <a class="text-link" href="login.html">Sign in</a></p>
