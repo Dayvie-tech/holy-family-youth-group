@@ -56,3 +56,13 @@
 .history-empty{padding:14px 16px;border:1px dashed #cbdde7;border-radius:12px;color:#718391;font-size:.86rem;background:#f8fbfd}
 @media(max-width:720px){.history-entry-grid{grid-template-columns:1fr}}
 @media(max-width:480px){.history-entry-card{grid-template-columns:1fr}.history-entry-card>img{height:190px;min-height:0}}
+
+
+.heritage-memory-form{width:min(100%,440px);display:grid;gap:10px;padding:20px;border:1px solid #d9e8ef;border-radius:14px;background:#fff}
+.heritage-memory-form[hidden]{display:none}
+.heritage-memory-form h3{margin:0;color:#123b56}
+.heritage-memory-form p{font-size:.82rem;line-height:1.55;color:#607383;margin:0}
+.heritage-memory-form label{display:grid;gap:5px;font-size:.8rem;font-weight:700;color:#123b56}
+.heritage-memory-form input,.heritage-memory-form select,.heritage-memory-form textarea{width:100%;padding:10px;border:1px solid #cbdde7;border-radius:8px;font:inherit;font-size:.85rem}
+.heritage-memory-form textarea{resize:vertical}
+.heritage-memory-form button{justify-self:start}
