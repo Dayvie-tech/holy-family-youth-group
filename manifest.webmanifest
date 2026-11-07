@@ -11,9 +11,15 @@
   "theme_color": "#168fc9",
   "icons": [
     {
-      "src": "./holy-family-youth-group-logo.jpg",
-      "type": "image/jpeg",
-      "sizes": "1536x1536",
+      "src": "./icons/icon-192.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
       "purpose": "any"
     }
   ]
