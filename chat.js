@@ -8,6 +8,15 @@ const messagesEl = $('chat-messages');
 const compose = $('chat-compose');
 const input = $('chat-message-input');
 const sendButton = $('chat-send');
+const recordButton = $('chat-record-voice');
+const cancelVoiceButton = $('chat-cancel-voice');
+const sendVoiceButton = $('chat-send-voice');
+const voicePreview = $('chat-voice-preview');
+const recordingStatus = $('chat-recording-status');
+
+const VOICE_BUCKET = 'chat-voice-notes';
+const MAX_VOICE_SECONDS = 120;
+const MAX_VOICE_BYTES = 5 * 1024 * 1024;
 
 let currentUser = null;
 let assignments = [];
@@ -15,6 +24,16 @@ let rooms = [];
 let activeRoom = null;
 let realtimeChannel = null;
 let messageLoadSequence = 0;
+let mediaRecorder = null;
+let mediaStream = null;
+let recordingChunks = [];
+let recordingStartedAt = 0;
+let recordingTimer = null;
+let voiceBlob = null;
+let voiceDurationSeconds = 0;
+let voicePreviewUrl = null;
+let voiceDraftRoomId = null;
+let discardRecording = false;
 
 function showStatus(message, type = '') {
   status.textContent = message;
@@ -41,6 +60,10 @@ function canModerate(room) {
 function formatTime(value) {
   return new Intl.DateTimeFormat('en-KE', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 }
+function formatDuration(seconds) {
+  const total = Math.max(0, Math.floor(seconds || 0));
+  return String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0');
+}
 function makeButton(label, className, handler) {
   const button = document.createElement('button');
   button.type = 'button';
@@ -62,6 +85,34 @@ function renderRooms() {
     button.append(name, kind);
     button.addEventListener('click', () => selectRoom(room));
     roomList.append(button);
+  });
+}
+function attachVoicePlayer(container, message) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chat-audio-message';
+  const label = document.createElement('span');
+  label.className = 'chat-audio-label';
+  label.textContent = 'Voice note · ' + formatDuration(message.audio_duration_seconds);
+  const audio = document.createElement('audio');
+  audio.controls = true;
+  audio.preload = 'metadata';
+  audio.setAttribute('aria-label', 'Voice note from ' + (message.author_display_name || 'member'));
+  const unavailable = document.createElement('small');
+  unavailable.className = 'chat-audio-unavailable';
+  unavailable.textContent = 'Loading voice note…';
+  wrapper.append(label, audio, unavailable);
+  container.append(wrapper);
+
+  supabase.storage.from(VOICE_BUCKET).createSignedUrl(message.audio_path, 3600).then(({ data, error }) => {
+    if (!audio.isConnected) return;
+    if (error || !data?.signedUrl) {
+      unavailable.textContent = 'This voice note is temporarily unavailable.';
+      return;
+    }
+    audio.src = data.signedUrl;
+    unavailable.remove();
+  }).catch(() => {
+    if (unavailable.isConnected) unavailable.textContent = 'This voice note is temporarily unavailable.';
   });
 }
 function renderMessages(rows) {
@@ -90,15 +141,26 @@ function renderMessages(rows) {
       edited.textContent = 'edited';
       meta.append(edited);
     }
-    const body = document.createElement('div');
-    body.className = 'chat-message-body';
-    body.textContent = message.body;
-    card.append(meta, body);
+    card.append(meta);
+
+    if (message.deleted_at) {
+      const removed = document.createElement('div');
+      removed.className = 'chat-message-body';
+      removed.textContent = 'Message removed by an administrator.';
+      card.append(removed);
+    } else if (message.message_type === 'audio' && message.audio_path) {
+      attachVoicePlayer(card, message);
+    } else {
+      const body = document.createElement('div');
+      body.className = 'chat-message-body';
+      body.textContent = message.body;
+      card.append(body);
+    }
 
     if (!message.deleted_at) {
       const actions = document.createElement('div');
       actions.className = 'chat-message-actions';
-      if (message.author_id === currentUser.id) {
+      if (message.author_id === currentUser.id && message.message_type === 'text') {
         actions.append(makeButton('Edit', '', () => editMessage(message)));
       }
       if (canModerate(activeRoom)) {
@@ -116,7 +178,7 @@ async function loadMessages() {
   const requestSequence = ++messageLoadSequence;
   const { data, error } = await supabase
     .from('chat_messages')
-    .select('id, room_id, author_id, author_display_name, body, created_at, edited_at, deleted_at')
+    .select('id, room_id, author_id, author_display_name, body, message_type, audio_path, audio_duration_seconds, created_at, edited_at, deleted_at')
     .eq('room_id', room.id)
     .order('created_at', { ascending: true })
     .limit(150);
@@ -127,7 +189,163 @@ async function loadMessages() {
   }
   renderMessages(data || []);
 }
+function releaseMediaStream() {
+  if (mediaStream) mediaStream.getTracks().forEach((track) => track.stop());
+  mediaStream = null;
+}
+function resetVoiceDraft() {
+  if (recordingTimer) window.clearInterval(recordingTimer);
+  recordingTimer = null;
+  releaseMediaStream();
+  if (voicePreviewUrl) URL.revokeObjectURL(voicePreviewUrl);
+  voicePreviewUrl = null;
+  voiceBlob = null;
+  voiceDurationSeconds = 0;
+  voiceDraftRoomId = null;
+  voicePreview.pause();
+  voicePreview.removeAttribute('src');
+  voicePreview.hidden = true;
+  cancelVoiceButton.hidden = true;
+  sendVoiceButton.hidden = true;
+  sendVoiceButton.disabled = true;
+  recordButton.disabled = !activeRoom;
+  recordButton.classList.remove('recording');
+  recordButton.innerHTML = '<span aria-hidden="true">●</span> Record voice note';
+  recordingStatus.textContent = 'Voice notes are limited to 2 minutes.';
+  if (activeRoom) {
+    input.disabled = false;
+    sendButton.disabled = false;
+  }
+}
+function updateRecordingClock() {
+  const elapsed = Math.min(MAX_VOICE_SECONDS, Math.floor((Date.now() - recordingStartedAt) / 1000));
+  recordingStatus.textContent = 'Recording ' + formatDuration(elapsed) + ' / ' + formatDuration(MAX_VOICE_SECONDS);
+  if (elapsed >= MAX_VOICE_SECONDS && mediaRecorder?.state === 'recording') {
+    showStatus('Two-minute limit reached. Your recording is ready to preview.', 'success');
+    mediaRecorder.stop();
+  }
+}
+async function startVoiceRecording() {
+  if (!activeRoom) return;
+  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+    showStatus('Voice recording is not supported by this browser. Try an updated Chrome, Edge or Safari browser.', 'error');
+    return;
+  }
+  try {
+    resetVoiceDraft();
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mimeOptions = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/webm'];
+    const selectedMime = mimeOptions.find((type) => MediaRecorder.isTypeSupported(type));
+    mediaRecorder = new MediaRecorder(mediaStream, selectedMime ? { mimeType: selectedMime } : undefined);
+    recordingChunks = [];
+    discardRecording = false;
+    voiceDraftRoomId = activeRoom.id;
+    recordingStartedAt = Date.now();
+    mediaRecorder.addEventListener('dataavailable', (event) => {
+      if (event.data && event.data.size) recordingChunks.push(event.data);
+    });
+    mediaRecorder.addEventListener('stop', () => {
+      const duration = Math.max(1, Math.min(MAX_VOICE_SECONDS, Math.round((Date.now() - recordingStartedAt) / 1000)));
+      releaseMediaStream();
+      if (discardRecording) {
+        discardRecording = false;
+        resetVoiceDraft();
+        return;
+      }
+      const mime = mediaRecorder?.mimeType || selectedMime || 'audio/webm';
+      voiceBlob = new Blob(recordingChunks, { type: mime });
+      voiceDurationSeconds = duration;
+      if (!voiceBlob.size || voiceBlob.size > MAX_VOICE_BYTES) {
+        showStatus('This recording is empty or larger than 5 MB. Please record a shorter voice note.', 'error');
+        resetVoiceDraft();
+        return;
+      }
+      voicePreviewUrl = URL.createObjectURL(voiceBlob);
+      voicePreview.src = voicePreviewUrl;
+      voicePreview.hidden = false;
+      cancelVoiceButton.hidden = false;
+      sendVoiceButton.hidden = false;
+      sendVoiceButton.disabled = false;
+      recordButton.disabled = false;
+      recordButton.classList.remove('recording');
+      recordButton.innerHTML = '<span aria-hidden="true">●</span> Record again';
+      recordingStatus.textContent = 'Preview your voice note (' + formatDuration(voiceDurationSeconds) + ') before sending.';
+      input.disabled = false;
+      sendButton.disabled = false;
+    }, { once: true });
+    mediaRecorder.start(250);
+    recordButton.disabled = false;
+    recordButton.classList.add('recording');
+    recordButton.innerHTML = '<span aria-hidden="true">■</span> Stop recording';
+    cancelVoiceButton.hidden = false;
+    input.disabled = true;
+    sendButton.disabled = true;
+    recordingStatus.textContent = 'Recording 00:00 / 02:00';
+    recordingTimer = window.setInterval(updateRecordingClock, 500);
+  } catch (error) {
+    releaseMediaStream();
+    resetVoiceDraft();
+    showStatus(error.name === 'NotAllowedError' ? 'Microphone permission was denied. Allow microphone access and try again.' : 'Could not start recording: ' + error.message, 'error');
+  }
+}
+function stopVoiceRecording() {
+  if (mediaRecorder?.state === 'recording') {
+    if (recordingTimer) window.clearInterval(recordingTimer);
+    recordingTimer = null;
+    mediaRecorder.stop();
+  }
+}
+function discardVoiceNote() {
+  if (mediaRecorder?.state === 'recording') {
+    discardRecording = true;
+    stopVoiceRecording();
+  } else {
+    resetVoiceDraft();
+  }
+}
+async function sendVoiceNote() {
+  if (!voiceBlob || !activeRoom || voiceDraftRoomId !== activeRoom.id) {
+    showStatus('Record a new voice note for this conversation before sending.', 'error');
+    return;
+  }
+  sendVoiceButton.disabled = true;
+  recordButton.disabled = true;
+  const mime = voiceBlob.type || 'audio/webm';
+  const extension = mime.includes('ogg') ? 'ogg' : (mime.includes('mp4') ? 'mp4' : (mime.includes('aac') ? 'aac' : 'webm'));
+  const randomId = window.crypto?.randomUUID ? window.crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+  const path = activeRoom.id + '/' + currentUser.id + '/' + randomId + '.' + extension;
+  const { error: uploadError } = await supabase.storage.from(VOICE_BUCKET).upload(path, voiceBlob, {
+    contentType: mime,
+    cacheControl: '3600',
+    upsert: false
+  });
+  if (uploadError) {
+    sendVoiceButton.disabled = false;
+    recordButton.disabled = false;
+    showStatus('Voice note upload failed: ' + uploadError.message, 'error');
+    return;
+  }
+  const { error: insertError } = await supabase.from('chat_messages').insert({
+    room_id: activeRoom.id,
+    body: '',
+    message_type: 'audio',
+    audio_path: path,
+    audio_duration_seconds: voiceDurationSeconds
+  });
+  if (insertError) {
+    await supabase.storage.from(VOICE_BUCKET).remove([path]);
+    sendVoiceButton.disabled = false;
+    recordButton.disabled = false;
+    showStatus('Voice note was uploaded but could not be sent: ' + insertError.message, 'error');
+    return;
+  }
+  resetVoiceDraft();
+  showStatus('Voice note sent.', 'success');
+  await loadMessages();
+}
 async function selectRoom(room) {
+  if (mediaRecorder?.state === 'recording') discardVoiceNote();
+  else resetVoiceDraft();
   activeRoom = room;
   renderRooms();
   $('chat-room-type').textContent = roomKind(room);
@@ -135,6 +353,7 @@ async function selectRoom(room) {
   $('chat-room-description').textContent = roomDescription(room);
   input.disabled = false;
   sendButton.disabled = false;
+  recordButton.disabled = false;
   messagesEl.innerHTML = '<div class="chat-empty">Loading conversation…</div>';
   if (realtimeChannel) {
     await supabase.removeChannel(realtimeChannel);
@@ -191,6 +410,13 @@ compose.addEventListener('submit', async (event) => {
   input.value = '';
   await loadMessages();
 });
+recordButton.addEventListener('click', () => {
+  if (mediaRecorder?.state === 'recording') stopVoiceRecording();
+  else startVoiceRecording();
+});
+cancelVoiceButton.addEventListener('click', discardVoiceNote);
+sendVoiceButton.addEventListener('click', sendVoiceNote);
+
 async function initialise() {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
   if (sessionError) throw sessionError;
@@ -229,6 +455,9 @@ async function initialise() {
   await selectRoom(firstRoom);
 }
 window.addEventListener('beforeunload', () => {
+  if (recordingTimer) window.clearInterval(recordingTimer);
+  releaseMediaStream();
+  if (voicePreviewUrl) URL.revokeObjectURL(voicePreviewUrl);
   if (realtimeChannel) supabase.removeChannel(realtimeChannel);
 });
 initialise().catch((error) => showStatus(error.message || 'The chat could not be opened.', 'error'));
