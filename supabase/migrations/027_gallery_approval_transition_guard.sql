@@ -33,7 +33,7 @@ begin
       if auth.uid() is null or auth.uid() = old.created_by then
         raise exception 'The album creator cannot reject their own album.';
       end if;
-    elsif old.status = 'published' and new.status = 'archived' then
+    elsif old.status in ('draft','pending','approved','published','rejected') and new.status = 'archived' then
       if new.published_at is not null then
         raise exception 'Archived albums cannot remain marked as published.';
       end if;
