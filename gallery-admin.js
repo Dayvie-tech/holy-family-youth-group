@@ -21,8 +21,10 @@ function action(parent, label, handler, light = false) {
   parent.append(button);
   return button;
 }
-function publicUrl(path) {
-  return supabase.storage.from('gallery-media').getPublicUrl(path).data.publicUrl;
+async function privatePhotoUrl(path) {
+  const result = await supabase.storage.from('gallery-media').createSignedUrl(path, 3600);
+  if (result.error) throw result.error;
+  return result.data.signedUrl;
 }
 async function saveAlbum(status) {
   clearMessage();
@@ -117,7 +119,7 @@ async function removePhoto(photo) {
   message('Photograph removed from the album.', 'success');
   await loadAlbums();
 }
-function renderAlbum(album, photos, review = false) {
+async function renderAlbum(album, photos, review = false) {
   const card = document.createElement('article');
   card.className = 'gallery-admin-card';
   const head = document.createElement('div');
@@ -167,7 +169,7 @@ function renderAlbum(album, photos, review = false) {
       const item = document.createElement('div');
       item.className = 'gallery-admin-photo';
       const img = document.createElement('img');
-      img.src = publicUrl(photo.storage_path);
+      img.src = await privatePhotoUrl(photo.storage_path);
       img.alt = photo.alt_text;
       const caption = document.createElement('p');
       caption.className = 'gallery-admin-meta';
@@ -220,8 +222,11 @@ async function loadAlbums() {
   const queue = $('gallery-review-list');
   all.replaceChildren();
   queue.replaceChildren();
-  state.albums.forEach(album => all.append(renderAlbum(album, photos.get(album.id) || [])));
-  state.albums.filter(album => ['pending', 'approved'].includes(album.status)).forEach(album => queue.append(renderAlbum(album, photos.get(album.id) || [], true)));
+  const allCards = await Promise.all(state.albums.map(album => renderAlbum(album, photos.get(album.id) || [])));
+  allCards.forEach(card => all.append(card));
+  const reviewAlbums = state.albums.filter(album => ['pending', 'approved'].includes(album.status));
+  const reviewCards = await Promise.all(reviewAlbums.map(album => renderAlbum(album, photos.get(album.id) || [], true)));
+  reviewCards.forEach(card => queue.append(card));
   if (!state.albums.length) all.innerHTML = '<div class="gallery-empty-admin">No albums have been created yet.</div>';
   if (!state.albums.some(album => ['pending', 'approved'].includes(album.status))) queue.innerHTML = '<div class="gallery-empty-admin">No albums are waiting for review.</div>';
 }
