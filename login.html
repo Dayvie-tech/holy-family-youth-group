@@ -18,12 +18,12 @@
           <h1>Welcome back</h1>
           <p>Sign in to continue to the youth portal.</p>
         </header>
-        <form id="login-form" class="auth-form">
+        <form id="login-form" class="auth-form" autocomplete="on">
           <label>Email address
-            <input id="login-email" type="email" autocomplete="email" required placeholder="you@example.com">
+            <input id="login-email" name="username" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="you@example.com">
           </label>
           <label>Password
-            <input id="login-password" type="password" autocomplete="current-password" required placeholder="Your password">
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="Your password">
           </label>
           <div id="login-message" class="form-message" role="status" aria-live="polite" hidden></div>
           <button id="login-submit" class="button" type="submit">Sign in</button>
