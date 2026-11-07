@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Member registration | Holy Family Youth Group</title>
+  <title>Registration Centre | Holy Family Youth Group</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="auth.css">
 </head>
@@ -15,11 +15,19 @@
         <img class="auth-logo" src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
         <header class="auth-heading">
           <p class="eyebrow blue">BECOME PART OF THE COMMUNITY</p>
-          <h1>Member registration</h1>
-          <p>Create your account and join your prayer house.</p>
+          <h1>Registration Centre</h1>
+          <p>Register as a member or submit an appointment application.</p>
         </header>
         <div class="auth-note">Email verification is required. After verifying your email, your membership will remain pending until an authorized administrator approves it.</div>
+        <section class="chaplain-registration-card" aria-labelledby="chaplain-registration-title">
+          <p class="eyebrow blue">DEDICATED APPOINTMENT REGISTRATION</p>
+          <h2 id="chaplain-registration-title">Parish Chaplain Registration</h2>
+          <p>Are you applying for the single Parish Chaplain position? Start here, then enter your personal details, contact information, prayer house and account password in the registration form below.</p>
+          <ul><li>One Parish Chaplain position is available.</li><li>The applicant must be male.</li><li>The appointment is reviewed and verified separately by authorized parish leadership.</li><li>This appointment does not provide Super Admin access.</li></ul>
+          <button id="chaplain-registration-start" class="button" type="button">Start Parish Chaplain Registration ↓</button>
+        </section>
         <form id="registration-form" class="auth-form" novalidate>
+          <p class="eyebrow blue registration-details-heading">PERSONAL DETAILS</p>
           <label>Full name
             <input id="full-name" name="full_name" type="text" autocomplete="name" maxlength="120" required placeholder="Enter your full name">
           </label>
