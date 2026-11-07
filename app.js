@@ -1,10 +1,10 @@
 const prayerHouses = [
   "Holy Family Nguviu",
   "Sacred Heart Kangenge",
-  "Our Lady of Assumption Gicherori",
+  "Our Lady of Visitation Gicherori",
   "St. Charles Kibugu",
   "St. John Kathangariri",
-  "Our Lady of Visitation Kianguchu",
+  "Our Lady of Assumption Kianguchu",
   "St. Ruth Kathakwa",
   "St. Joseph Gatunduri"
 ];
