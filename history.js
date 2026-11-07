@@ -12,12 +12,14 @@ function dateLabel(value) {
   if (!value) return 'Date not recorded';
   return new Intl.DateTimeFormat('en-KE', { dateStyle: 'long', timeZone: 'Africa/Nairobi' }).format(new Date(value + 'T00:00:00'));
 }
-function entryCard(entry) {
+async function entryCard(entry) {
   const card = document.createElement('article');
   card.className = 'history-entry-card';
   if (entry.photo_path) {
     const img = document.createElement('img');
-    img.src = supabase.storage.from('heritage-media').getPublicUrl(entry.photo_path).data.publicUrl;
+    const photoResult = await supabase.storage.from('heritage-media').createSignedUrl(entry.photo_path, 3600);
+    if (photoResult.error) throw photoResult.error;
+    img.src = photoResult.data.signedUrl;
     img.alt = entry.photo_caption || entry.title;
     card.append(img);
   }
@@ -69,7 +71,8 @@ async function loadHistory() {
       if (matching.length) {
         const cards = document.createElement('div');
         cards.className = 'history-entry-grid';
-        matching.forEach(entry => cards.append(entryCard(entry)));
+        const entryCards = await Promise.all(matching.map(entry => entryCard(entry)));
+        entryCards.forEach(card => cards.append(card));
         section.append(cards);
       } else {
         const empty = document.createElement('p');
