@@ -43,7 +43,13 @@ async function loadHouseAdministrators() {
     holder.className = 'house-admin-holder';
     const holderId = holders.get(house.id);
     const label = document.createElement('strong');
-    label.textContent = holderId ? (names.get(holderId) || 'Assigned member') : 'Vacant';
+    label.textContent = holderId ? (names.get(holderId) || 'Assigned member') : 'VACANT';
+    if (!holderId) {
+      label.className = 'house-admin-vacant';
+      holder.setAttribute('aria-label', `${house.name}: administrator position vacant`);
+    } else {
+      label.className = 'house-admin-assigned';
+    }
     holder.append('Administrator: ', label);
     card.append(heading, holder);
     const assignment = (assignmentsResult.data || []).find((item) => item.prayer_house_id === house.id && item.is_active !== false);
