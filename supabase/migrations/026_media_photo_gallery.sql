@@ -148,14 +148,16 @@ create trigger gallery_photos_audit after insert or update or delete on public.g
 for each row execute function private.audit_gallery_photo_change();
 
 insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types)
-values ('gallery-media','gallery-media',true,8388608,array['image/jpeg','image/png','image/webp'])
+values ('gallery-media','gallery-media',false,8388608,array['image/jpeg','image/png','image/webp'])
 on conflict (id) do update
 set public = excluded.public,
     file_size_limit = excluded.file_size_limit,
     allowed_mime_types = excluded.allowed_mime_types;
 
-create policy "gallery_media_public_read" on storage.objects
-for select to anon, authenticated using (bucket_id = 'gallery-media');
+create policy "gallery_media_admin_read" on storage.objects
+for select to authenticated using (
+  bucket_id = 'gallery-media' and (select private.has_parish_admin_access())
+);
 create policy "gallery_media_admin_upload" on storage.objects
 for insert to authenticated with check (
   bucket_id = 'gallery-media' and (select private.has_parish_admin_access())
@@ -194,3 +196,12 @@ comment on view public.published_gallery_albums is
   'Public-facing published photo albums only; internal creator and reviewer information is not exposed.';
 comment on view public.published_gallery_photos is
   'Public-facing photos from published albums only; internal uploader information is not exposed.';
+
+create policy "gallery_media_published_read" on storage.objects
+for select to anon, authenticated using (
+  bucket_id = 'gallery-media'
+  and exists (
+    select 1 from public.published_gallery_photos p
+    where p.storage_path = name
+  )
+);
