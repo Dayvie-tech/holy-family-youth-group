@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0c4265">
+<title>History & Heritage Manager | Holy Family Youth Group</title>
+<link rel="icon" href="holy-family-youth-group-logo.jpg" type="image/jpeg"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="auth.css"><link rel="stylesheet" href="history-admin.css">
+</head>
+<body><main class="auth-shell"><div class="container heritage-admin-container">
+<header class="admin-topbar"><a class="admin-brand" href="index.html"><img src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo"><span><strong>Holy Family Youth Group</strong><small>History & Heritage Manager</small></span></a>
+<div class="heritage-header-actions"><a class="button button-light" href="history.html">View public history</a><a class="button button-light" href="admin-dashboard.html">Admin dashboard</a><button id="heritage-sign-out" class="button button-light" type="button">Sign out</button></div></header>
+<div id="heritage-access" class="form-message info" role="status">Checking your administrator access…</div>
+<section id="heritage-admin" hidden>
+<div class="heritage-admin-intro"><p class="eyebrow blue">PRESERVE OUR STORY</p><h1>History & Heritage Manager</h1><p>Create verified records, preserve photographs and review memories shared by members. Only published entries appear on the public History page.</p></div>
+<div id="heritage-admin-message" class="form-message" role="status" aria-live="polite" hidden></div>
+<div class="heritage-admin-grid">
+<section class="heritage-panel"><div class="heritage-panel-heading"><p class="eyebrow blue">CONTENT EDITOR</p><h2 id="heritage-editor-title">Add a history record</h2><p>Use confirmed information only. Leave the date blank if it has not been verified.</p></div>
+<form id="heritage-entry-form" class="heritage-form">
+<input id="heritage-entry-id" type="hidden">
+<label>Record title<input id="heritage-title" type="text" minlength="3" maxlength="180" required placeholder="e.g. The beginning of our youth community"></label>
+<label>History category<select id="heritage-category" required><option value="beginnings">Our beginnings</option><option value="faith-fellowship">Faith & fellowship</option><option value="leadership-service">Leadership & service</option><option value="projects-milestones">Projects & milestones</option><option value="photo-memories">Photo memories</option></select></label>
+<label>Date or milestone date (optional)<input id="heritage-date" type="date"></label>
+<label>Story / description<textarea id="heritage-body" rows="7" minlength="10" maxlength="20000" required placeholder="Write the verified story, names, context and details…"></textarea></label>
+<label>Photograph (JPG, PNG or WebP · max 8 MB)<input id="heritage-photo" type="file" accept="image/jpeg,image/png,image/webp"></label>
+<label>Photo caption (optional)<input id="heritage-caption" type="text" maxlength="300" placeholder="Who or what is shown? Add only confirmed details."></label>
+<label class="heritage-checkbox"><input id="heritage-remove-photo" type="checkbox"> Remove the existing photograph when saving</label>
+<div class="heritage-form-actions"><button class="button button-light" type="button" id="heritage-save-draft">Save draft</button><button class="button" type="submit">Submit for review</button></div>
+<button class="button button-light heritage-cancel-edit" type="button" id="heritage-cancel-edit" hidden>Cancel editing</button>
+<p class="heritage-note">A draft remains private. Submitting sends it to another authorised parish administrator for approval. You cannot publish your own submission.</p>
+</form></section>
+<section class="heritage-panel"><div class="heritage-panel-heading"><p class="eyebrow blue">REVIEW & PUBLISH</p><h2>Waiting for review</h2><p>Approve and publish verified entries submitted by other administrators or members.</p></div><div id="heritage-review-list" class="heritage-record-list"><div class="admin-empty">Loading review queue…</div></div></section>
+</div>
+<section class="heritage-panel heritage-all-records"><div class="heritage-panel-heading heritage-heading-row"><div><p class="eyebrow blue">ARCHIVE CONTENT</p><h2>All history records</h2><p>Manage drafts, published entries and archived records.</p></div><button id="heritage-refresh" class="button button-light" type="button">Refresh</button></div><div id="heritage-all-list" class="heritage-record-list"><div class="admin-empty">Loading records…</div></div></section>
+</section></div></main><script type="module" src="history-admin.js"></script></body></html>
