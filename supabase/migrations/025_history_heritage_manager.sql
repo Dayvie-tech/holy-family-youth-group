@@ -65,14 +65,14 @@ for each row execute function private.set_heritage_entry_updated_at();
 
 create or replace function private.guard_heritage_entry_owner()
 returns trigger language plpgsql set search_path = ''
-as $
+as $$
 begin
   if new.created_by is distinct from old.created_by then
     raise exception 'The original history record submitter cannot be changed.';
   end if;
   return new;
 end;
-$;
+$$;
 revoke execute on function private.guard_heritage_entry_owner() from public, anon, authenticated;
 create trigger heritage_entries_guard_owner before update on public.heritage_entries
 for each row execute function private.guard_heritage_entry_owner();
