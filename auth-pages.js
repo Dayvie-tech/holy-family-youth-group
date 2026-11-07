@@ -291,19 +291,20 @@ async function setupAdminDashboard() {
   const officeSelect = $('super-admin-office');
   const memberSelect = $('super-admin-member');
   const superAdminOffices = ['Youth Chaplain', 'Youth Matron', 'Youth Patron', 'Parish Moderator'];
+  let currentAdminUserId = null;
 
-  async function loadSuperAdminPanel() {
+  async function loadSuperAdminPanel(currentUserId) {
     if (!superAdminPanel) return;
     superAdminPanel.hidden = false;
     officeList.innerHTML = '<div class="admin-empty">Loading office holders…</div>';
     const [membersResult, assignmentsResult] = await Promise.all([
       supabase.from('profiles').select('id, full_name').eq('membership_status', 'approved').order('full_name'),
-      supabase.from('admin_assignments').select('user_id, super_admin_office').eq('access_level', 'super_admin').eq('is_active', true)
+      supabase.from('admin_assignments').select('id, user_id, super_admin_office').eq('access_level', 'super_admin').eq('is_active', true)
     ]);
     if (membersResult.error) throw membersResult.error;
     if (assignmentsResult.error) throw assignmentsResult.error;
     const members = membersResult.data || [];
-    const holders = new Map((assignmentsResult.data || []).map((item) => [item.super_admin_office, item.user_id]));
+    const holders = new Map((assignmentsResult.data || []).map((item) => [item.super_admin_office, item]));
     const names = new Map(members.map((member) => [member.id, member.full_name]));
     officeList.replaceChildren();
     superAdminOffices.forEach((office) => {
@@ -312,9 +313,52 @@ async function setupAdminDashboard() {
       const title = document.createElement('strong');
       title.textContent = office;
       const holder = document.createElement('span');
-      const holderId = holders.get(office);
-      holder.textContent = holderId ? (names.get(holderId) || 'Assigned member') : 'Vacant';
+      const assignment = holders.get(office);
+      holder.textContent = assignment ? (names.get(assignment.user_id) || 'Assigned member') : 'VACANT';
       card.append(title, holder);
+
+      if (assignment?.user_id === currentUserId) {
+        const stepDown = document.createElement('button');
+        stepDown.type = 'button';
+        stepDown.className = 'button button-light super-admin-step-down';
+        stepDown.textContent = 'Voluntarily step down';
+        stepDown.addEventListener('click', async () => {
+          const confirmed = window.confirm(
+            'Step down from ' + office + '? This will immediately make the office VACANT. Your member account and any other roles you hold will remain unchanged.'
+          );
+          if (!confirmed) return;
+          stepDown.disabled = true;
+          stepDown.textContent = 'Processing…';
+          hideMessage(superAdminStatus);
+          try {
+            const { error } = await supabase.rpc('step_down_super_admin_office', { p_office: office });
+            if (error) throw error;
+            const { data: remaining, error: remainingError } = await supabase
+              .from('admin_assignments')
+              .select('access_level')
+              .eq('user_id', currentUserId)
+              .eq('is_active', true);
+            if (remainingError) throw remainingError;
+
+            if ((remaining || []).some((item) => item.access_level === 'super_admin')) {
+              showMessage(superAdminStatus, 'You have stepped down from ' + office + '. The office is now marked VACANT.', 'success');
+              await loadSuperAdminPanel(currentUserId);
+            } else {
+              superAdminPanel.hidden = true;
+              if ((remaining || []).length) {
+                showMessage(status, 'You have stepped down from ' + office + '. The office is now VACANT. Your other administrative role remains active.', 'success');
+              } else {
+                window.location.replace('member-dashboard.html');
+              }
+            }
+          } catch (error) {
+            showMessage(superAdminStatus, error.message || 'You could not step down from this office. Please try again.', 'error');
+            stepDown.disabled = false;
+            stepDown.textContent = 'Voluntarily step down';
+          }
+        });
+        card.append(stepDown);
+      }
       officeList.append(card);
     });
     memberSelect.replaceChildren();
@@ -347,7 +391,7 @@ async function setupAdminDashboard() {
       if (error) throw error;
       showMessage(superAdminStatus, office + ' appointment saved successfully. The previous holder, if any, has been moved out of that office.', 'success');
       assignmentForm.reset();
-      await loadSuperAdminPanel();
+      await loadSuperAdminPanel(currentAdminUserId);
     } catch (error) {
       showMessage(superAdminStatus, error.message || 'The office appointment could not be saved.', 'error');
     } finally {
@@ -462,6 +506,7 @@ async function setupAdminDashboard() {
         window.location.replace('login.html');
         return;
       }
+      currentAdminUserId = user.id;
 
       const { data: assignments, error: assignmentError } = await supabase
         .from('admin_assignments')
