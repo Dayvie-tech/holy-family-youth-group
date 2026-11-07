@@ -114,7 +114,7 @@ function mount() {
   button.type = 'button';
   button.setAttribute('aria-label', 'Open notifications');
   button.setAttribute('aria-expanded', 'false');
-  button.innerHTML = '<span aria-hidden="true">♧</span><span class="notification-bell-label">Notifications</span>';
+  button.innerHTML = '<span aria-hidden="true">🔔</span><span class="notification-bell-label">Notifications</span>';
   badge = make('span', 'notification-badge');
   badge.hidden = true;
   button.append(badge);
