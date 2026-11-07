@@ -116,18 +116,14 @@ async function loadMeetings() {
 }
 
 async function loadGuestInvite(token) {
-  loading.textContent='Checking your invitation…';
-  try {
-    const tokenHash=await sha256(token);
-    const {data,error}=await supabase.rpc('get_guest_virtual_meeting_invite',{p_token_hash:tokenHash});
-    if(error) throw error;
-    const invite=Array.isArray(data)?data[0]:null;
-    if(!invite){loading.textContent='This invitation is invalid, expired or has been cancelled.';return;}
-    $('guest-invite-title').textContent='You’re invited, '+invite.guest_name;
-    $('guest-invite-details').textContent=invite.title+' · '+formatDate(invite.starts_at)+' – '+formatDate(invite.ends_at)+(invite.description?' · '+invite.description:'');
-    $('guest-invite-panel').hidden=false;
-    loading.hidden=true;
-  } catch(error){loading.textContent=error.message||'Unable to verify this invitation.';}
+  if (!/^[a-f0-9]{64}$/i.test(token)) {
+    loading.textContent='This guest invitation link is not recognised.';
+    return;
+  }
+  $('guest-invite-title').textContent='Your guest invitation';
+  $('guest-invite-details').textContent='You have received a guest invitation to a Holy Family Nguviu Parish youth virtual meeting. Please contact the person who shared this link for the meeting schedule and details.';
+  $('guest-invite-panel').hidden=false;
+  loading.hidden=true;
 }
 
 async function initialize() {
