@@ -21,7 +21,7 @@ async function loadHouseAdministrators() {
   const [housesResult, membersResult, assignmentsResult] = await Promise.all([
     supabase.from('prayer_houses').select('id, name').eq('is_active', true).order('id'),
     supabase.from('profiles').select('id, full_name').eq('membership_status', 'approved').order('full_name'),
-    supabase.from('admin_assignments').select('user_id, prayer_house_id').eq('access_level', 'prayer_house_admin').eq('is_active', true)
+    supabase.from('admin_assignments').select('id, user_id, prayer_house_id').eq('access_level', 'prayer_house_admin').eq('is_active', true)
   ]);
 
   if (housesResult.error) throw housesResult.error;
@@ -46,6 +46,18 @@ async function loadHouseAdministrators() {
     label.textContent = holderId ? (names.get(holderId) || 'Assigned member') : 'Vacant';
     holder.append('Administrator: ', label);
     card.append(heading, holder);
+    const assignment = (assignmentsResult.data || []).find((item) => item.prayer_house_id === house.id && item.is_active !== false);
+    if (assignment) {
+      const actions = document.createElement('div');
+      actions.className = 'house-admin-actions';
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'button button-light';
+      removeButton.textContent = 'Remove administrator';
+      removeButton.addEventListener('click', () => removeHouseAdministrator(assignment.id, house.name, names.get(assignment.user_id) || 'this administrator'));
+      actions.append(removeButton);
+      card.append(actions);
+    }
     houseList.append(card);
   });
 
@@ -72,6 +84,29 @@ async function loadHouseAdministrators() {
     option.textContent = member.full_name;
     memberSelect.append(option);
   });
+}
+
+async function removeHouseAdministrator(assignmentId, houseName, administratorName) {
+  const confirmed = window.confirm(
+    `Remove ${administratorName} as administrator of ${houseName}? Their youth membership will remain active, but their administrator access to this house will be revoked.`
+  );
+  if (!confirmed) return;
+
+  const buttons = houseList.querySelectorAll('button');
+  buttons.forEach((button) => { button.disabled = true; });
+  showStatus('Removing the prayer-house administrator…', 'info');
+  try {
+    const { error } = await supabase.rpc('remove_prayer_house_admin', {
+      p_assignment_id: assignmentId
+    });
+    if (error) throw error;
+    showStatus(`Administrator access for ${administratorName} at ${houseName} has been removed. The prayer house is now vacant.`, 'success');
+    await loadHouseAdministrators();
+  } catch (error) {
+    showStatus(error.message || 'The administrator could not be removed.', 'error');
+  } finally {
+    buttons.forEach((button) => { button.disabled = false; });
+  }
 }
 
 async function initialize() {
