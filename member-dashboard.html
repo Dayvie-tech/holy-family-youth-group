@@ -3,26 +3,69 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Member portal | Holy Family Youth Group</title>
+  <meta name="theme-color" content="#0c4265">
+  <meta name="description" content="Your member home for Holy Family Youth Group, Nguviu.">
+  <title>Member home | Holy Family Youth Group</title>
+  <link rel="icon" href="holy-family-youth-group-logo.jpg" type="image/jpeg">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="member-dashboard.css">
 </head>
 <body>
-  <main class="auth-shell">
-    <div class="container">
+  <main class="member-shell">
+    <div class="container member-container">
+      <header class="member-topbar">
+        <a class="member-brand" href="index.html">
+          <img src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
+          <span><strong>HOLY FAMILY</strong><small>YOUTH GROUP · MEMBER HOME</small></span>
+        </a>
+        <div class="member-top-actions">
+          <a class="button button-light" href="index.html">Public website</a>
+          <button id="sign-out" class="button button-light" type="button">Sign out</button>
+        </div>
+      </header>
+
       <div id="access-check" class="form-message auth-card" role="status" aria-live="polite">Checking your member access…</div>
-      <section id="protected-page" class="auth-card" hidden>
-        <img class="auth-logo" src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
-        <header class="auth-heading">
-          <p class="eyebrow blue">HOLY FAMILY YOUTH GROUP</p>
-          <h1>Member portal</h1>
-          <p>Welcome, <strong id="member-name">Member</strong>.</p>
-          <p id="member-house" class="auth-help"></p>
-        </header>
-        <div class="auth-note">Your membership is approved. This is the secure entry point for the member area. Events, chat, Youth Voice and other member modules will be connected in their own pages as the project progresses.</div>
-        <div class="auth-divider"></div>
-        <a class="button button-light" href="index.html">Public homepage</a>
-        <button id="sign-out" class="button" type="button">Sign out</button>
+
+      <section id="protected-page" class="member-dashboard" hidden>
+        <section class="member-welcome">
+          <div>
+            <p class="eyebrow">YOUR HOLY FAMILY SPACE</p>
+            <h1>Welcome home, <span id="member-name">Member</span>.</h1>
+            <p>Stay connected with your prayer house and the wider parish youth community.</p>
+          </div>
+          <div class="member-house-pill"><span>YOUR PRAYER HOUSE</span><strong id="member-house">Loading…</strong></div>
+        </section>
+
+        <section class="member-section" aria-labelledby="quick-links-title">
+          <div class="member-section-heading">
+            <p class="eyebrow blue">YOUR COMMUNITY</p>
+            <h2 id="quick-links-title">Everything in one place</h2>
+            <p>Choose where you would like to go.</p>
+          </div>
+          <div class="member-link-grid">
+            <a class="member-link-card" href="announcements.html"><span class="member-link-icon">✦</span><strong>Announcements</strong><span>Read official parish and prayer-house updates.</span><b>Open announcements →</b></a>
+            <a class="member-link-card" href="events.html"><span class="member-link-icon">▦</span><strong>Events & activities</strong><span>See upcoming gatherings and revisit past events.</span><b>Explore events →</b></a>
+            <a class="member-link-card" href="chat.html"><span class="member-link-icon">☏</span><strong>Community chat</strong><span>Connect with members in the rooms you can access.</span><b>Join the conversation →</b></a>
+            <a class="member-link-card" href="youth-voice.html"><span class="member-link-icon">◎</span><strong>Youth Voice</strong><span>Share ideas and read published community voices.</span><b>Visit Youth Voice →</b></a>
+            <a class="member-link-card" href="contributions.html"><span class="member-link-icon">♡</span><strong>Parish contributions</strong><span>View collective progress across our eight prayer houses.</span><b>View progress →</b></a>
+            <a class="member-link-card" href="history.html"><span class="member-link-icon">⌛</span><strong>Our history</strong><span>Explore the story and heritage of our youth community.</span><b>Explore our history →</b></a>
+          </div>
+        </section>
+
+        <section class="member-bottom-grid">
+          <article class="member-info-card">
+            <p class="eyebrow blue">YOUR MEMBERSHIP</p>
+            <h2>Approved member</h2>
+            <p>Your membership is active. Keep your account details secure and contact an authorised leader if your information needs correcting.</p>
+          </article>
+          <article class="member-info-card member-values-card">
+            <p class="eyebrow">OUR SHARED MISSION</p>
+            <h2>Faith · Community · Service</h2>
+            <p>“I WILL NOT REST TILL CHRIST IS KNOWN TO ALL.”</p>
+          </article>
+        </section>
+        <p class="member-privacy-note">Your personal information and private administrative records are protected. Contribution progress is shared collectively, without identifying or ranking individual members.</p>
       </section>
     </div>
   </main>
