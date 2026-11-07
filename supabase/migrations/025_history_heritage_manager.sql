@@ -20,7 +20,7 @@ create index heritage_entries_public_order_idx on public.heritage_entries (categ
 create index heritage_entries_admin_queue_idx on public.heritage_entries (status, updated_at desc);
 alter table public.heritage_entries enable row level security;
 revoke all on public.heritage_entries from public, anon, authenticated;
-grant select on public.heritage_entries to anon, authenticated;
+grant select on public.heritage_entries to authenticated;
 grant insert, update on public.heritage_entries to authenticated;
 
 create policy "heritage_public_reads_published" on public.heritage_entries
@@ -33,10 +33,10 @@ for insert to authenticated with check (
   and exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.membership_status = 'approved')
 );
 create policy "heritage_admin_creates_entries" on public.heritage_entries
-for insert to authenticated with check ((select private.has_parish_admin_access()) and created_by = (select auth.uid()));
+for insert to authenticated with check ((select private.has_parish_admin_access()) and created_by = (select auth.uid()) and status in ('draft','pending'));
 create policy "heritage_admin_updates_entries" on public.heritage_entries
 for update to authenticated using ((select private.has_parish_admin_access()))
-with check ((select private.has_parish_admin_access()) and (status <> 'published' or created_by <> (select auth.uid())));
+with check ((select private.has_parish_admin_access()) and (status <> 'published' or (created_by <> (select auth.uid()) and reviewed_by = (select auth.uid()) and reviewed_at is not null)));
 
 create or replace function private.set_heritage_entry_updated_at()
 returns trigger language plpgsql set search_path = ''
@@ -68,7 +68,7 @@ begin
   values (coalesce(new.id, old.id), auth.uid(), tg_op,
     case when tg_op = 'INSERT' then null else old.status end,
     case when tg_op = 'DELETE' then null else new.status end);
-  return coalesce(new, old);
+  if tg_op = 'DELETE' then return old; end if;\n  return new;
 end;
 $$;
 create trigger heritage_entries_audit after insert or update or delete on public.heritage_entries
@@ -86,3 +86,15 @@ using (bucket_id = 'heritage-media' and (select private.has_parish_admin_access(
 with check (bucket_id = 'heritage-media' and (select private.has_parish_admin_access()));
 create policy "heritage_media_admin_delete" on storage.objects for delete to authenticated
 using (bucket_id = 'heritage-media' and (select private.has_parish_admin_access()));
+
+-- Public readers use a narrow view so internal account IDs and review metadata stay private.
+create or replace view public.published_heritage_entries
+with (security_barrier = true, security_invoker = false)
+as
+select id, title, category, body, event_date, photo_path, photo_caption, published_at, created_at
+from public.heritage_entries
+where status = 'published';
+revoke all on public.published_heritage_entries from public, anon, authenticated;
+grant select on public.published_heritage_entries to anon, authenticated;
+comment on view public.published_heritage_entries is
+  'Public-facing published heritage content only. Internal submitter and reviewer identifiers are not exposed.';
