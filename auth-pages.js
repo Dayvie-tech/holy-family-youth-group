@@ -469,6 +469,10 @@ async function setupAdminDashboard() {
       if (heritageLink) {
         heritageLink.hidden = !assignments.some((assignment) => ['parish_admin', 'super_admin'].includes(assignment.access_level));
       }
+      const galleryLink = $('gallery-manager-link');
+      if (galleryLink) {
+        galleryLink.hidden = !assignments.some((assignment) => ['parish_admin', 'super_admin'].includes(assignment.access_level));
+      }
       if (assignments.some((assignment) => assignment.access_level === 'super_admin')) {
         await loadSuperAdminPanel();
       }
