@@ -120,8 +120,8 @@ grant execute on function private.can_access_chat_room(uuid) to authenticated;
 grant execute on function private.can_moderate_chat_room(uuid) to authenticated;
 insert into public.chat_rooms (room_type, name, prayer_house_id) values
 ('general','General Youth Chat',null),('prayer_house','Holy Family Nguviu',1),('prayer_house','Sacred Heart Kangenge',2),
-('prayer_house','Our Lady of Assumption Gicherori',3),('prayer_house','St. Charles Kibugu',4),('prayer_house','St. John Chrysostom Kathangariri',5),
-('prayer_house','Our Lady of Visitation Kianguchu',6),('prayer_house','St. Ruth Kathakwa',7),('prayer_house','St. Joseph Gatunduri',8),
+('prayer_house','Our Lady of Visitation Gicherori',3),('prayer_house','St. Charles Kibugu',4),('prayer_house','St. John Chrysostom Kathangariri',5),
+('prayer_house','Our Lady of Assumption Kianguchu',6),('prayer_house','St. Ruth Kathakwa',7),('prayer_house','St. Joseph Gatunduri',8),
 ('leadership','Leadership Chat',null) on conflict do nothing;
 do $$ begin
   if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='chat_messages') then
