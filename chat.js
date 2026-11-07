@@ -43,16 +43,18 @@ function showStatus(message, type = '') {
 function roomKind(room) {
   if (room.room_type === 'general') return 'PARISH-WIDE CHAT';
   if (room.room_type === 'leadership') return 'LEADERSHIP CHAT';
+  if (room.room_type === 'patron_matron') return 'PATRONS & MATRON CHAT';
   return 'PRAYER HOUSE CHAT';
 }
 function roomDescription(room) {
   if (room.room_type === 'general') return 'A shared conversation for all approved parish youth members.';
   if (room.room_type === 'leadership') return 'For verified leaders and authorised administrators.';
+  if (room.room_type === 'patron_matron') return 'A private shared room for approved members with a verified parish or prayer-house Patron/Matron appointment.';
   return 'A private conversation for members and authorised administrators of this prayer house.';
 }
 function canModerate(room) {
   const parishAdmin = assignments.some((a) => a.is_active && ['parish_admin', 'super_admin'].includes(a.access_level));
-  if (room.room_type === 'leadership' || room.room_type === 'general') return parishAdmin;
+  if (room.room_type === 'leadership' || room.room_type === 'general' || room.room_type === 'patron_matron') return parishAdmin;
   return parishAdmin || assignments.some((a) =>
     a.is_active && a.access_level === 'prayer_house_admin' && Number(a.prayer_house_id) === Number(room.prayer_house_id)
   );
