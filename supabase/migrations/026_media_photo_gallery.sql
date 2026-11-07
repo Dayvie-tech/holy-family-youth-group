@@ -4,7 +4,7 @@ create table public.gallery_albums (
   title text not null check (char_length(btrim(title)) between 3 and 180),
   description text not null default '' check (char_length(description) <= 3000),
   event_date date,
-  prayer_house_id bigint references public.prayer_houses(id) on delete set null,
+  prayer_house_id smallint references public.prayer_houses(id) on delete set null,
   status text not null default 'draft'
     check (status in ('draft','pending','approved','published','rejected','archived')),
   created_by uuid not null references auth.users(id) on delete restrict,
