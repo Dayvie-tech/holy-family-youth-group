@@ -24,6 +24,7 @@ let rooms = [];
 let activeRoom = null;
 let realtimeChannel = null;
 let messageLoadSequence = 0;
+let messageReloadTimer = null;
 let mediaRecorder = null;
 let mediaStream = null;
 let recordingChunks = [];
@@ -175,6 +176,10 @@ function renderMessages(rows) {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 async function loadMessages() {
+  if (messageReloadTimer) {
+    window.clearTimeout(messageReloadTimer);
+    messageReloadTimer = null;
+  }
   const room = activeRoom;
   if (!room) return;
   const requestSequence = ++messageLoadSequence;
@@ -190,6 +195,13 @@ async function loadMessages() {
     return;
   }
   renderMessages(data || []);
+}
+function scheduleMessageReload() {
+  if (messageReloadTimer) window.clearTimeout(messageReloadTimer);
+  messageReloadTimer = window.setTimeout(() => {
+    messageReloadTimer = null;
+    void loadMessages();
+  }, 180);
 }
 function releaseMediaStream() {
   if (mediaStream) mediaStream.getTracks().forEach((track) => track.stop());
@@ -346,6 +358,10 @@ async function sendVoiceNote() {
   await loadMessages();
 }
 async function selectRoom(room) {
+  if (messageReloadTimer) {
+    window.clearTimeout(messageReloadTimer);
+    messageReloadTimer = null;
+  }
   if (mediaRecorder?.state === 'recording') discardVoiceNote();
   else resetVoiceDraft();
   activeRoom = room;
@@ -364,7 +380,7 @@ async function selectRoom(room) {
   await loadMessages();
   realtimeChannel = supabase
     .channel('chat-room-' + room.id)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages', filter: 'room_id=eq.' + room.id }, () => loadMessages())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages', filter: 'room_id=eq.' + room.id }, () => scheduleMessageReload())
     .subscribe((state) => {
       if (state === 'CHANNEL_ERROR' || state === 'TIMED_OUT') {
         showStatus('Live updates are temporarily unavailable. You can still refresh the conversation.', 'error');
