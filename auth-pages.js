@@ -63,8 +63,8 @@ function setupRegistration() {
     chaplain: 'Apply for the single Parish Chaplain appointment. Applicants must be male and select Father or Deacon.'
   };
   const claimOptions = {
-    prayer_house: ['Chairperson', 'Vice Chairperson', 'Secretary', 'Vice Secretary', 'Treasurer', 'Organizing Secretary', 'Project Manager', 'Assistant Project Manager', 'Games Coordinator', 'Catechist'],
-    parish: ['Moderator', 'Vice Moderator', 'Secretary', 'Vice Secretary', 'Treasurer', 'Organizing Secretary', 'Project Manager', 'Assistant Project Manager', 'Games Coordinator', 'Catechist']
+    prayer_house: ['Chairperson', 'Vice Chairperson', 'Secretary', 'Vice Secretary', 'Treasurer', 'Organizing Secretary', 'Project Manager', 'Assistant Project Manager', 'Games Coordinator', 'Catechist', 'Patron', 'Matron'],
+    parish: ['Chairperson', 'Vice Chairperson', 'Secretary', 'Vice Secretary', 'Treasurer', 'Organizing Secretary', 'Project Manager', 'Assistant Project Manager', 'Games Coordinator', 'Catechist', 'Patron', 'Matron']
   };
 
   function refreshClaimFields() {
@@ -94,6 +94,10 @@ function setupRegistration() {
     const isPatronMatron = selected === 'patron' || selected === 'matron';
     leadershipFields.hidden = !(isHouseLeader || isParishLeader);
     chaplainFields.hidden = !isChaplain;
+    const houseField = $('prayer-house-field');
+    if (houseField) houseField.hidden = isChaplain;
+    house.required = !isChaplain;
+    if (isChaplain) house.value = '';
     patronMatronFields.hidden = !isPatronMatron;
     scope.value = isHouseLeader ? 'prayer_house' : isParishLeader ? 'parish' : '';
     scope.disabled = true;
@@ -127,11 +131,13 @@ function setupRegistration() {
     const fullName = $('full-name').value.trim();
     const email = $('email').value.trim().toLowerCase();
     const phone = $('phone').value.trim();
-    const prayerHouseId = house.value;
+    const prayerHouseId = selectedRole === 'chaplain' ? null : house.value;
     const password = $('password').value;
     const confirmPassword = $('confirm-password').value;
     const claimScope = selectedRole === 'prayer_house_leader' ? 'prayer_house' : selectedRole === 'parish_leader' ? 'parish' : '';
-    const claimOffice = claimScope ? office.value : '';
+    const selectedOffice = claimScope ? office.value : '';
+    const isPatronMatronOffice = ['Patron', 'Matron'].includes(selectedOffice);
+    const claimOffice = claimScope && !isPatronMatronOffice ? selectedOffice : '';
     const patronScope = selectedRole === 'patron' ? $('patron-claim-scope').value : '';
     const matronScope = selectedRole === 'matron' ? $('matron-claim-scope').value : '';
     const chaplainScope = selectedRole === 'chaplain' ? 'parish' : '';
@@ -144,6 +150,7 @@ function setupRegistration() {
       if (selectedScope === 'parish' || selectedScope === 'both') patronMatronClaims.push({ office_name: officeName, scope: 'parish' });
       if (selectedScope === 'prayer_house' || selectedScope === 'both') patronMatronClaims.push({ office_name: officeName, scope: 'prayer_house' });
     }
+    if (isPatronMatronOffice) addPatronMatronClaims(selectedOffice, claimScope);
     addPatronMatronClaims('Patron', patronScope);
     addPatronMatronClaims('Matron', matronScope);
 
@@ -153,7 +160,7 @@ function setupRegistration() {
 
     if (!passwordIsStrong) return showMessage(message, 'Use at least 12 characters, with uppercase and lowercase letters, a number and a symbol.', 'error');
     if (password !== confirmPassword) return showMessage(message, 'The two passwords do not match.', 'error');
-    if ((claimScope && !claimOffice) || (selectedRole === 'patron' && !patronScope) || (selectedRole === 'matron' && !matronScope)) {
+    if ((claimScope && !selectedOffice) || (selectedRole === 'patron' && !patronScope) || (selectedRole === 'matron' && !matronScope)) {
       return showMessage(message, 'Choose the appointment level and office details required for your selected registration type.', 'error');
     }
     if (chaplainScope && (gender !== 'male' || !['Father', 'Deacon'].includes(title))) {
@@ -170,7 +177,7 @@ function setupRegistration() {
           emailRedirectTo: authCallbackUrl(),
           data: {
             full_name: fullName, phone, prayer_house_id: prayerHouseId,
-            claim_scope: claimScope || null, claim_office: claimOffice || null,
+            claim_scope: claimOffice ? claimScope : null, claim_office: claimOffice || null,
             gender: gender || null, chaplain_claim: chaplainScope || null,
             chaplain_title: title || null, patron_matron_claims: patronMatronClaims,
             registration_role: selectedRole
