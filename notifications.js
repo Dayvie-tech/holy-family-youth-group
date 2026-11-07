@@ -20,7 +20,7 @@ const make = (tag, className, text) => {
 };
 
 function notificationLabel(type) {
-  return ({ announcement: 'ANNOUNCEMENT', event: 'EVENT', chat: 'CHAT', youth_voice: 'YOUTH VOICE' })[type] || 'UPDATE';
+  return ({ announcement: 'ANNOUNCEMENT', event: 'EVENT', chat: 'CHAT', youth_voice: 'YOUTH VOICE', meeting: 'MEETING' })[type] || 'UPDATE';
 }
 
 function unreadCount() {
