@@ -39,7 +39,7 @@ begin
     if v_gender is distinct from 'male' then
       raise exception 'The Parish Chaplain appointment is reserved for male members.';
     end if;
-    if v_chaplain_title not in ('Father', 'Deacon') then
+    if v_chaplain_title is null or v_chaplain_title not in ('Father', 'Deacon') then
       raise exception 'A Parish Chaplain applicant must select Father or Deacon as their Church title.';
     end if;
   else
