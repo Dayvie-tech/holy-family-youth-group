@@ -315,7 +315,7 @@ async function sendVoiceNote() {
   const randomId = window.crypto?.randomUUID ? window.crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
   const path = activeRoom.id + '/' + currentUser.id + '/' + randomId + '.' + extension;
   const { error: uploadError } = await supabase.storage.from(VOICE_BUCKET).upload(path, voiceBlob, {
-    contentType: mime,
+    contentType: mime.split(';')[0],
     cacheControl: '3600',
     upsert: false
   });
