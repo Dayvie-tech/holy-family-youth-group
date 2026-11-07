@@ -165,7 +165,7 @@ async function renderAlbum(album, photos, review = false) {
   if (photos.length) {
     const grid = document.createElement('div');
     grid.className = 'gallery-admin-photo-grid';
-    photos.forEach(photo => {
+    for (const photo of photos) {
       const item = document.createElement('div');
       item.className = 'gallery-admin-photo';
       const img = document.createElement('img');
@@ -177,7 +177,7 @@ async function renderAlbum(album, photos, review = false) {
       item.append(img, caption);
       if (album.status !== 'published') action(item, 'Remove photo', () => removePhoto(photo), true);
       grid.append(item);
-    });
+    }
     card.append(grid);
   } else {
     const note = document.createElement('p');
