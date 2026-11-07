@@ -568,3 +568,6 @@ async function setupAdminDashboard() {
 }
 
 setupAdminDashboard();
+
+// Keep notifications available on authenticated dashboard and administration pages.
+import('./notifications.js').catch((error) => console.warn('Notification centre unavailable:', error));
