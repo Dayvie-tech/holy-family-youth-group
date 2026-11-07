@@ -1,4 +1,16 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.102.0';
+// Load the Supabase SDK with a second CDN available if the primary module host fails.
+let createClient;
+try {
+  ({ createClient } = await import('https://esm.sh/@supabase/supabase-js@2.102.0'));
+} catch (primaryError) {
+  console.warn('Primary Supabase SDK CDN unavailable; trying the fallback CDN.', primaryError);
+  try {
+    ({ createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.102.0/+esm'));
+  } catch (fallbackError) {
+    console.error('Both Supabase SDK CDNs failed to load.', fallbackError);
+    throw new Error('The sign-in service could not load. Check your internet connection and reload the page.');
+  }
+}
 
 // This is the public publishable key. Never place a service-role or secret key here.
 export const SUPABASE_URL = 'https://thhfvrlpywmgmlpondnj.supabase.co';

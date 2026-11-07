@@ -33,6 +33,6 @@
       </section>
     </div>
   </main>
-  <script type="module" src="auth-pages.js"></script>
+  <script type="module" src="auth-pages.js" onerror="const message=document.getElementById('login-message'); message.textContent='The sign-in service could not load. Check your internet connection, refresh the page and try again.'; message.className='form-message error'; message.hidden=false;"></script>
 </body>
 </html>
