@@ -32,3 +32,6 @@ if (menuButton && navigation) {
 
 const year = document.querySelector("#current-year");
 if (year) year.textContent = new Date().getFullYear();
+
+// Load the signed-in member notification centre on shared site pages.
+import('./notifications.js').catch((error) => console.warn('Notification centre unavailable:', error));
