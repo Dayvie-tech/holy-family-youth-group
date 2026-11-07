@@ -159,7 +159,7 @@ async function initialize() {
       scopeSelect.addEventListener('change',updateScope);updateScope();
     }
     loading.hidden=true;app.hidden=false;
-    await loadMeetings();
+    await loadMeetings().catch(error=>status(error.message||'Unable to load meetings.','error'));
   } catch(error){loading.textContent=error.message||'Unable to load the Virtual Meetings module.';}
 }
 
