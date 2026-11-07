@@ -81,6 +81,14 @@ function setupRegistration() {
     if (!claimingChaplain) genderSelect.value = '';
   });
 
+  const chaplainStart = $('chaplain-registration-start');
+  chaplainStart?.addEventListener('click', () => {
+    chaplainClaim.value = 'parish';
+    chaplainClaim.dispatchEvent(new Event('change'));
+    $('full-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    $('full-name')?.focus({ preventScroll: true });
+  });
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = $('registration-message');
