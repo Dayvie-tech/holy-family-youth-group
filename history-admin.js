@@ -87,15 +87,18 @@ function renderRecord(entry, review = false) {
   const actions = document.createElement('div');
   actions.className = 'heritage-record-actions';
   if (review) {
-    if (entry.created_by !== state.user.id) {
-      addAction(actions, 'Publish', () => updateStatus(entry, 'published'));
-    } else {
+    if (entry.created_by === state.user.id) {
       const note = document.createElement('span');
       note.className = 'heritage-meta';
-      note.textContent = 'Another administrator must review your submission.';
+      note.textContent = 'Another authorised administrator must review and publish this submission.';
       actions.append(note);
+    } else if (entry.status === 'pending') {
+      addAction(actions, 'Approve', () => updateStatus(entry, 'approved'));
+      addAction(actions, 'Reject', () => updateStatus(entry, 'rejected'), 'button-light');
+    } else if (entry.status === 'approved') {
+      addAction(actions, 'Publish', () => updateStatus(entry, 'published'));
+      addAction(actions, 'Reject', () => updateStatus(entry, 'rejected'), 'button-light');
     }
-    addAction(actions, 'Reject', () => updateStatus(entry, 'rejected'), 'button-light');
   }
   addAction(actions, 'Edit', () => beginEdit(entry), 'button-light');
   if (entry.status !== 'archived') addAction(actions, 'Archive', () => updateStatus(entry, 'archived'), 'button-light');
@@ -105,16 +108,26 @@ function renderRecord(entry, review = false) {
 }
 async function updateStatus(entry, status) {
   clearMessage();
-  const isDecision = status === 'published' || status === 'rejected';
-  const patch = {
-    status,
-    reviewed_by: isDecision ? state.user.id : null,
-    reviewed_at: isDecision ? new Date().toISOString() : null,
-    published_at: status === 'published' ? new Date().toISOString() : null
-  };
-  const { error } = await supabase.from('heritage_entries').update(patch).eq('id', entry.id);
+  const now = new Date().toISOString();
+  const patch = { status };
+  if (status === 'approved' || status === 'rejected') {
+    patch.reviewed_by = state.user.id;
+    patch.reviewed_at = now;
+    patch.published_at = null;
+  } else if (status === 'published') {
+    patch.published_at = now;
+  } else if (status === 'draft') {
+    patch.reviewed_by = null;
+    patch.reviewed_at = null;
+    patch.published_at = null;
+  } else if (status === 'archived') {
+    patch.published_at = null;
+  }
+  const { data, error } = await supabase.from('heritage_entries').update(patch).eq('id', entry.id).select('id').maybeSingle();
   if (error) { showMessage(error.message, 'error'); return; }
-  showMessage(status === 'published' ? 'History record published successfully.' : 'Record moved to ' + status.replaceAll('_', ' ') + '.', 'success');
+  if (!data) { showMessage('This record could not be changed. Check your administrator permissions and try refreshing.', 'error'); return; }
+  const labels = { approved: 'approved for publication', published: 'published', rejected: 'rejected', archived: 'archived', draft: 'returned to draft' };
+  showMessage('History record ' + (labels[status] || status) + '.', 'success');
   await loadEntries();
 }
 async function uploadPhoto(file) {
@@ -142,6 +155,9 @@ async function saveEntry(status) {
   if (file) payload.photo_path = await uploadPhoto(file);
   if ($('heritage-remove-photo').checked) payload.photo_path = null;
   if (id) {
+    payload.reviewed_by = null;
+    payload.reviewed_at = null;
+    payload.published_at = null;
     const { error } = await supabase.from('heritage_entries').update(payload).eq('id', id);
     if (error) throw error;
     showMessage('History record updated. If it was previously published, it must be reviewed again before returning to the public archive.', 'success');
@@ -157,7 +173,7 @@ async function saveEntry(status) {
 async function loadEntries() {
   const results = await Promise.all([
     supabase.from('heritage_entries').select('*').order('updated_at', { ascending: false }).limit(150),
-    supabase.from('heritage_entries').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(100)
+    supabase.from('heritage_entries').select('*').in('status', ['pending', 'approved']).order('created_at', { ascending: true }).limit(100)
   ]);
   if (results[0].error) throw results[0].error;
   if (results[1].error) throw results[1].error;
