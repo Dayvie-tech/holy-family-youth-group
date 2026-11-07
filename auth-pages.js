@@ -470,7 +470,7 @@ async function setupAdminDashboard() {
     const memberIds = [...new Set(claims.map((claim) => claim.member_id))];
     const { data: members, error: membersError } = await supabase
       .from('profiles')
-      .select('id, full_name, primary_prayer_house_id, gender')
+      .select('id, full_name, primary_prayer_house_id, gender, chaplain_title')
       .in('id', memberIds);
     if (membersError) throw membersError;
     const memberMap = new Map((members || []).map((member) => [member.id, member]));
@@ -493,7 +493,7 @@ async function setupAdminDashboard() {
       const meta = document.createElement('p');
       meta.className = 'application-meta';
       meta.textContent = claim.office_name + ' · Submitted ' + new Date(claim.nominated_at).toLocaleDateString()
-        + (claim.office_name === 'Chaplain' ? ' · Gender: ' + (member?.gender || 'Not recorded') : '');
+        + (claim.office_name === 'Chaplain' ? ' · ' + (member?.chaplain_title || 'Church title not recorded') + ' · Gender: ' + (member?.gender || 'Not recorded') : '');
 
       const actions = document.createElement('div');
       actions.className = 'application-actions';
