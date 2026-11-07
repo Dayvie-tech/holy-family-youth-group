@@ -167,6 +167,8 @@ function setupRegistration() {
       showMessage(message, 'Registration received. We have sent a verification link to your email. Open that link to verify your address; your membership will then remain pending until an administrator approves it.', 'success');
       form.reset();
       refreshClaimFields();
+      genderField.hidden = true;
+      genderSelect.required = false;
     } catch (error) {
       showMessage(message, error.message || 'Registration could not be completed. Please try again.', 'error');
     } finally {
