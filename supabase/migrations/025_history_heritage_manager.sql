@@ -7,7 +7,7 @@ create table public.heritage_entries (
   event_date date,
   photo_path text,
   photo_caption text,
-  status text not null default 'draft' check (status in ('draft','pending','published','rejected','archived')),
+  status text not null default 'draft' check (status in ('draft','pending','approved','published','rejected','archived')),
   created_by uuid not null references auth.users(id) on delete restrict,
   updated_by uuid references auth.users(id) on delete set null,
   reviewed_by uuid references auth.users(id) on delete set null,
@@ -36,7 +36,14 @@ create policy "heritage_admin_creates_entries" on public.heritage_entries
 for insert to authenticated with check ((select private.has_parish_admin_access()) and created_by = (select auth.uid()) and status in ('draft','pending'));
 create policy "heritage_admin_updates_entries" on public.heritage_entries
 for update to authenticated using ((select private.has_parish_admin_access()))
-with check ((select private.has_parish_admin_access()) and (status <> 'published' or (created_by <> (select auth.uid()) and reviewed_by = (select auth.uid()) and reviewed_at is not null)));
+with check (
+  (select private.has_parish_admin_access())
+  and (
+    status not in ('approved','published','rejected')
+    or (created_by <> (select auth.uid()) and reviewed_by = (select auth.uid()) and reviewed_at is not null)
+  )
+  and (status <> 'published' or published_at is not null)
+);
 
 create or replace function private.set_heritage_entry_updated_at()
 returns trigger language plpgsql set search_path = ''
