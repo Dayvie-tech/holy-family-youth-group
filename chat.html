@@ -51,6 +51,15 @@
             <form id="chat-compose" class="chat-compose">
               <label class="sr-only" for="chat-message-input">Write a message</label>
               <textarea id="chat-message-input" rows="2" maxlength="2000" placeholder="Write a message…" required disabled></textarea>
+              <div class="chat-voice-tools" aria-label="Voice note controls">
+                <div class="chat-recording-status" id="chat-recording-status" role="status" aria-live="polite">Voice notes are limited to 2 minutes.</div>
+                <div class="chat-voice-actions">
+                  <button id="chat-record-voice" class="chat-voice-button" type="button" disabled><span aria-hidden="true">●</span> Record voice note</button>
+                  <button id="chat-cancel-voice" class="chat-voice-button secondary" type="button" hidden>Discard</button>
+                  <button id="chat-send-voice" class="chat-voice-button send" type="button" disabled hidden>Send voice note</button>
+                </div>
+                <audio id="chat-voice-preview" class="chat-voice-preview" controls preload="metadata" hidden></audio>
+              </div>
               <div class="chat-compose-footer"><span>Be kind. Keep our conversations respectful.</span><button id="chat-send" class="button button-light" type="submit" disabled>Send message <span>→</span></button></div>
             </form>
           </section>
