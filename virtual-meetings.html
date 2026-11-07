@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c4265">
+  <meta name="description" content="Schedule and manage Holy Family Nguviu Parish youth virtual meetings.">
+  <title>Virtual Meetings | Holy Family Youth Group</title>
+  <link rel="icon" href="holy-family-youth-group-logo.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="virtual-meetings.css">
+</head>
+<body>
+  <main class="auth-shell">
+    <div class="container virtual-container">
+      <header class="admin-topbar">
+        <a class="admin-brand" href="index.html">
+          <img src="holy-family-youth-group-logo.jpg" alt="Official Holy Family Youth Group logo">
+          <span><strong>Holy Family Youth Group</strong><small>Virtual Meetings & Digital Fellowship</small></span>
+        </a>
+        <div class="virtual-top-actions">
+          <a class="button button-light" href="member-dashboard.html">Member home</a>
+          <a class="button button-light" href="index.html">Public homepage</a>
+          <button id="meeting-sign-out" class="button button-light" type="button">Sign out</button>
+        </div>
+      </header>
+
+      <section id="guest-invite-panel" class="guest-invite-panel" hidden>
+        <p class="eyebrow blue">PERSONAL MEETING INVITATION</p>
+        <h1 id="guest-invite-title">You're invited</h1>
+        <p id="guest-invite-details"></p>
+        <p class="meeting-note">Keep this invitation link private. Ask the meeting host for the schedule and details. Secure guest verification and live video joining will be enabled in the next development milestone.</p>
+      </section>
+
+      <section id="virtual-meetings-app" hidden>
+        <div class="virtual-intro">
+          <p class="eyebrow blue">FAITH · FELLOWSHIP · CONNECTION</p>
+          <h1>Virtual Meetings</h1>
+          <p>Bring our parish youth community together, wherever everyone is.</p>
+        </div>
+
+        <div id="meeting-status" class="form-message" role="status" aria-live="polite" hidden></div>
+
+        <section id="meeting-create-section" class="meeting-create-section" hidden>
+          <div class="meeting-section-heading">
+            <div><p class="eyebrow blue">MEETING MANAGEMENT</p><h2>Schedule a meeting</h2><p>Create a parish-wide or prayer-house gathering.</p></div>
+          </div>
+          <form id="meeting-create-form" class="meeting-form">
+            <label for="meeting-title">Meeting title</label>
+            <input id="meeting-title" maxlength="160" minlength="3" required placeholder="e.g. Monthly Youth Fellowship">
+            <label for="meeting-description">Description / agenda</label>
+            <textarea id="meeting-description" maxlength="3000" rows="3" placeholder="What will the meeting cover?"></textarea>
+            <div class="meeting-form-grid">
+              <div><label for="meeting-visibility">Meeting audience</label>
+                <select id="meeting-visibility" required>
+                  <option value="parish">Parish-wide</option>
+                  <option value="prayer_house">Prayer-house members</option>
+                  <option value="invite_only">Invitation only</option>
+                </select>
+              </div>
+              <div id="meeting-house-wrap" hidden><label for="meeting-house">Prayer house</label><select id="meeting-house"></select></div>
+              <div><label for="meeting-start">Start date & time</label><input id="meeting-start" type="datetime-local" required></div>
+              <div><label for="meeting-end">End date & time</label><input id="meeting-end" type="datetime-local" required></div>
+            </div>
+            <p class="meeting-note">Times use your device's local time. External guest invitations are created after scheduling.</p>
+            <button id="meeting-create-submit" class="button" type="submit">Schedule meeting</button>
+          </form>
+        </section>
+
+        <section class="meeting-list-section">
+          <div class="meeting-section-heading"><div><p class="eyebrow blue">YOUR COMMUNITY</p><h2>Upcoming meetings</h2><p>Meetings visible to your membership and invitations.</p></div><button id="meeting-refresh" class="button button-light" type="button">Refresh</button></div>
+          <div id="meeting-list" class="meeting-list" aria-live="polite"><div class="admin-empty">Loading meetings…</div></div>
+        </section>
+      </section>
+      <div id="meeting-loading" class="admin-empty">Checking your access…</div>
+    </div>
+  </main>
+  <script type="module" src="virtual-meetings.js"></script>
+</body>
+</html>
