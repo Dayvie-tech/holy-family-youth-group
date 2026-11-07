@@ -91,7 +91,7 @@ using (bucket_id = 'heritage-media' and (select private.has_parish_admin_access(
 create or replace view public.published_heritage_entries
 with (security_barrier = true, security_invoker = false)
 as
-select id, title, category, body, event_date, photo_path, photo_caption, published_at, created_at
+select id, title, category, body, event_date, photo_path, photo_caption, 'published'::text as status, published_at, created_at
 from public.heritage_entries
 where status = 'published';
 revoke all on public.published_heritage_entries from public, anon, authenticated;
