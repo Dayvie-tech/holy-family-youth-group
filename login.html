@@ -25,14 +25,32 @@
           <label>Password
             <input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="Your password">
           </label>
-          <div id="login-message" class="form-message" role="status" aria-live="polite" hidden></div>
-          <button id="login-submit" class="button" type="submit">Sign in</button>
+          <div id="login-message" class="form-message" role="status" aria-live="polite">Connecting to the sign-in service…</div>
+          <button id="login-submit" class="button" type="submit" disabled>Connecting…</button>
         </form>
         <div class="auth-divider"></div>
         <p class="auth-foot">New to the community? <a class="text-link" href="register.html">Register here</a></p>
       </section>
     </div>
   </main>
-  <script type="module" src="auth-pages.js" onerror="const message=document.getElementById('login-message'); message.textContent='The sign-in service could not load. Check your internet connection, refresh the page and try again.'; message.className='form-message error'; message.hidden=false;"></script>
+  <script>
+    // Prevent a native form submission/reload while the module and Supabase SDK initialise.
+    (() => {
+      const form = document.getElementById('login-form');
+      const button = document.getElementById('login-submit');
+      const message = document.getElementById('login-message');
+      form.addEventListener('submit', (event) => {
+        if (form.dataset.authReady !== 'true') {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          message.textContent = 'The sign-in service is still connecting. Please wait a moment and try again.';
+          message.className = 'form-message info';
+          message.hidden = false;
+          button.disabled = true;
+        }
+      }, true);
+    })();
+  </script>
+  <script type="module" src="auth-pages.js" onerror="const message=document.getElementById('login-message'); const button=document.getElementById('login-submit'); message.textContent='The sign-in service could not load. Check your internet connection, refresh the page and try again.'; message.className='form-message error'; message.hidden=false; button.disabled=true; button.textContent='Service unavailable';"></script>
 </body>
 </html>
