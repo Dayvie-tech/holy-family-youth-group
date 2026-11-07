@@ -19,6 +19,7 @@ create table if not exists public.chat_messages (
   deleted_at timestamptz,
   deleted_by uuid references public.profiles(id) on delete set null
 );
+create unique index if not exists chat_rooms_singleton_type_idx on public.chat_rooms(room_type) where prayer_house_id is null;
 create index if not exists chat_messages_room_created_idx on public.chat_messages(room_id, created_at desc);
 create index if not exists chat_messages_author_created_idx on public.chat_messages(author_id, created_at desc);
 alter table public.chat_rooms enable row level security;
@@ -121,7 +122,7 @@ insert into public.chat_rooms (room_type, name, prayer_house_id) values
 ('general','General Youth Chat',null),('prayer_house','Holy Family Nguviu',1),('prayer_house','Sacred Heart Kangenge',2),
 ('prayer_house','Our Lady of Assumption Gicherori',3),('prayer_house','St. Charles Kibugu',4),('prayer_house','St. John Chrysostom Kathangariri',5),
 ('prayer_house','Our Lady of Visitation Kianguchu',6),('prayer_house','St. Ruth Kathakwa',7),('prayer_house','St. Joseph Gatunduri',8),
-('leadership','Leadership Chat',null) on conflict (room_type, prayer_house_id) do update set name = excluded.name;
+('leadership','Leadership Chat',null) on conflict do nothing;
 do $$ begin
   if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='chat_messages') then
     alter publication supabase_realtime add table public.chat_messages;
