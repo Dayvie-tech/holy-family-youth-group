@@ -205,6 +205,9 @@ function setupRegistration() {
 function setupLogin() {
   const form = $('login-form');
   if (!form) return;
+  const submit = $('login-submit');
+  // Attach the handler before enabling the button, so the browser can never
+  // fall back to a native form submission while authentication is initialising.
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = $('login-message');
@@ -226,6 +229,10 @@ function setupLogin() {
       submit.textContent = 'Sign in';
     }
   });
+  form.dataset.authReady = 'true';
+  submit.disabled = false;
+  submit.textContent = 'Sign in';
+  hideMessage($('login-message'));
 }
 
 async function setupCallback() {
