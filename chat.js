@@ -10,12 +10,11 @@ const input = $('chat-message-input');
 const sendButton = $('chat-send');
 
 let currentUser = null;
-let currentProfile = null;
 let assignments = [];
 let rooms = [];
 let activeRoom = null;
 let realtimeChannel = null;
-let loadingMessages = false;
+let messageLoadSequence = 0;
 
 function showStatus(message, type = '') {
   status.textContent = message;
@@ -112,15 +111,16 @@ function renderMessages(rows) {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 async function loadMessages() {
-  if (!activeRoom || loadingMessages) return;
-  loadingMessages = true;
+  const room = activeRoom;
+  if (!room) return;
+  const requestSequence = ++messageLoadSequence;
   const { data, error } = await supabase
     .from('chat_messages')
     .select('id, room_id, author_id, author_display_name, body, created_at, edited_at, deleted_at')
-    .eq('room_id', activeRoom.id)
+    .eq('room_id', room.id)
     .order('created_at', { ascending: true })
     .limit(150);
-  loadingMessages = false;
+  if (requestSequence !== messageLoadSequence || activeRoom?.id !== room.id) return;
   if (error) {
     showStatus('Could not load this conversation: ' + error.message, 'error');
     return;
@@ -210,7 +210,6 @@ async function initialise() {
     window.location.replace(profile.membership_status === 'pending' ? 'pending.html' : 'login.html');
     return;
   }
-  currentProfile = profile;
   $('chat-member-greeting').textContent = 'Signed in as ' + (profile.display_name || profile.full_name);
 
   const [assignmentResult, roomResult] = await Promise.all([
