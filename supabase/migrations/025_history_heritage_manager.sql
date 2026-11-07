@@ -68,7 +68,8 @@ begin
   values (coalesce(new.id, old.id), auth.uid(), tg_op,
     case when tg_op = 'INSERT' then null else old.status end,
     case when tg_op = 'DELETE' then null else new.status end);
-  if tg_op = 'DELETE' then return old; end if;\n  return new;
+  if tg_op = 'DELETE' then return old; end if;
+  return new;
 end;
 $$;
 create trigger heritage_entries_audit after insert or update or delete on public.heritage_entries
