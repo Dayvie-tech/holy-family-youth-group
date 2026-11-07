@@ -527,7 +527,7 @@ async function setupAdminDashboard() {
         galleryLink.hidden = !assignments.some((assignment) => ['parish_admin', 'super_admin'].includes(assignment.access_level));
       }
       if (assignments.some((assignment) => assignment.access_level === 'super_admin')) {
-        await loadSuperAdminPanel();
+        await loadSuperAdminPanel(user.id);
       }
 
       const { data: houses, error: housesError } = await supabase
