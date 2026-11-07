@@ -147,7 +147,8 @@ function setupRegistration() {
     addPatronMatronClaims('Patron', patronScope);
     addPatronMatronClaims('Matron', matronScope);
 
-    const allowedSymbols = ['!', '@', '#', '    const passwordIsStrong = password.length >= 12 && /[a-z]/.test(password) && /[A-Z]/.test(password)
+    const allowedSymbols = '!@#$%^&*()-_=+[]{}:,.?';
+    const passwordIsStrong = password.length >= 12 && /[a-z]/.test(password) && /[A-Z]/.test(password)
       && /[0-9]/.test(password) && [...allowedSymbols].some((character) => password.includes(character));
 
     if (!passwordIsStrong) return showMessage(message, 'Use at least 12 characters, with uppercase and lowercase letters, a number and a symbol.', 'error');
