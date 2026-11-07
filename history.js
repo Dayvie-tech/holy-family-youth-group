@@ -43,7 +43,7 @@ function entryCard(entry) {
 async function loadHistory() {
   const status = document.getElementById('history-load-status');
   try {
-    const result = await supabase.from('heritage_entries')
+    const result = await supabase.from('published_heritage_entries')
       .select('id,title,category,body,event_date,photo_path,photo_caption,created_at')
       .eq('status', 'published')
       .order('event_date', { ascending: false, nullsFirst: false })
@@ -88,3 +88,39 @@ async function loadHistory() {
   }
 }
 loadHistory();
+
+async function setupMemorySubmission() {
+  const form = document.getElementById('heritage-memory-form');
+  if (!form) return;
+  try {
+    const sessionResult = await supabase.auth.getSession();
+    const user = sessionResult.data.session && sessionResult.data.session.user;
+    if (!user) return;
+    const profileResult = await supabase.from('profiles').select('membership_status').eq('id', user.id).single();
+    if (!profileResult.error && profileResult.data && profileResult.data.membership_status === 'approved') form.hidden = false;
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const status = document.getElementById('memory-submit-status');
+      status.textContent = 'Submitting your memory…';
+      const payload = {
+        title: document.getElementById('memory-title').value.trim(),
+        category: document.getElementById('memory-category').value,
+        event_date: document.getElementById('memory-date').value || null,
+        body: document.getElementById('memory-body').value.trim(),
+        status: 'pending',
+        created_by: user.id
+      };
+      const result = await supabase.from('heritage_entries').insert(payload);
+      if (result.error) {
+        status.textContent = 'Your memory could not be submitted. Please try again.';
+        console.error('Memory submission failed', result.error);
+        return;
+      }
+      form.reset();
+      status.textContent = 'Thank you. Your memory has been sent for parish review and is not public yet.';
+    });
+  } catch (error) {
+    console.error('Could not initialise member memory form', error);
+  }
+}
+setupMemorySubmission();
