@@ -44,9 +44,24 @@ function setupRegistration() {
   const form = $('registration-form');
   if (!form) return;
 
+  const role = $('registration-role');
   const scope = $('claim-scope');
   const office = $('claim-office');
   const house = $('prayer-house');
+  const leadershipFields = $('leadership-fields');
+  const chaplainFields = $('chaplain-fields');
+  const patronMatronFields = $('patron-matron-fields');
+  const genderField = $('gender-field');
+  const genderSelect = $('member-gender');
+  const chaplainTitle = $('chaplain-title');
+  const descriptions = {
+    member: 'Register as an ordinary member of the youth group.',
+    prayer_house_leader: 'Apply for a leadership office in your selected prayer house. Your application will be reviewed.',
+    parish_leader: 'Apply for a parish-wide leadership office. Your application will be reviewed.',
+    patron: 'Submit an application for the Patron appointment at parish or prayer-house level.',
+    matron: 'Submit an application for the Matron appointment at parish or prayer-house level.',
+    chaplain: 'Apply for the single Parish Chaplain appointment. Applicants must be male and select Father or Deacon.'
+  };
   const claimOptions = {
     prayer_house: ['Chairperson', 'Vice Chairperson', 'Secretary', 'Vice Secretary', 'Treasurer', 'Organizing Secretary', 'Project Manager', 'Assistant Project Manager', 'Games Coordinator', 'Catechist'],
     parish: ['Moderator', 'Vice Moderator', 'Secretary', 'Vice Secretary', 'Treasurer', 'Organizing Secretary', 'Project Manager', 'Assistant Project Manager', 'Games Coordinator', 'Catechist']
@@ -54,7 +69,11 @@ function setupRegistration() {
 
   function refreshClaimFields() {
     const selectedScope = scope.value;
-    office.innerHTML = '<option value="">Select an office (optional)</option>';
+    office.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Choose the leadership office';
+    office.append(placeholder);
     (claimOptions[selectedScope] || []).forEach((name) => {
       const option = document.createElement('option');
       option.value = name;
@@ -63,86 +82,80 @@ function setupRegistration() {
     });
     office.disabled = !selectedScope;
     $('claim-note').textContent = selectedScope === 'parish'
-      ? 'Parish office claims are submitted for verification by the authorized parish leadership.'
-      : selectedScope === 'prayer_house'
-        ? 'Prayer-house office claims will be linked to the prayer house selected above and must be verified.'
-        : 'You can register as an ordinary member without claiming a leadership office.';
+      ? 'Parish office applications are reviewed by authorized parish leadership.'
+      : 'Prayer-house office applications are linked to your selected prayer house and reviewed by authorized leaders.';
+  }
+
+  function refreshRoleFields() {
+    const selected = role.value;
+    const isHouseLeader = selected === 'prayer_house_leader';
+    const isParishLeader = selected === 'parish_leader';
+    const isChaplain = selected === 'chaplain';
+    const isPatronMatron = selected === 'patron' || selected === 'matron';
+    leadershipFields.hidden = !(isHouseLeader || isParishLeader);
+    chaplainFields.hidden = !isChaplain;
+    patronMatronFields.hidden = !isPatronMatron;
+    scope.value = isHouseLeader ? 'prayer_house' : isParishLeader ? 'parish' : '';
+    scope.disabled = true;
+    refreshClaimFields();
+    $('claim-scope').disabled = true;
+    $('claim-office').required = isHouseLeader || isParishLeader;
+    $('patron-claim-scope').value = selected === 'patron' ? 'parish' : '';
+    $('matron-claim-scope').value = selected === 'matron' ? 'parish' : '';
+    $('patron-claim-scope').required = selected === 'patron';
+    $('matron-claim-scope').required = selected === 'matron';
+    genderField.hidden = !isChaplain;
+    genderSelect.required = isChaplain;
+    genderSelect.value = isChaplain ? 'male' : '';
+    genderSelect.disabled = isChaplain;
+    chaplainTitle.required = isChaplain;
+    if (!isChaplain) chaplainTitle.value = '';
+    $('role-description').textContent = descriptions[selected] || descriptions.member;
   }
   scope.addEventListener('change', refreshClaimFields);
-  refreshClaimFields();
-
-  const chaplainClaim = $('chaplain-claim');
-  const genderField = $('gender-field');
-  const genderSelect = $('member-gender');
-  chaplainClaim?.addEventListener('change', () => {
-    const claimingChaplain = chaplainClaim.value === 'parish';
-    genderField.hidden = !claimingChaplain;
-    genderSelect.required = claimingChaplain;
-    if (!claimingChaplain) genderSelect.value = '';
-  });
-
-  const chaplainStart = $('chaplain-registration-start');
-  chaplainStart?.addEventListener('click', () => {
-    chaplainClaim.value = 'parish';
-    chaplainClaim.dispatchEvent(new Event('change'));
-    $('full-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    $('full-name')?.focus({ preventScroll: true });
-  });
+  role.addEventListener('change', refreshRoleFields);
+  refreshRoleFields();
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = $('registration-message');
     hideMessage(message);
 
+    const selectedRole = role.value;
     const fullName = $('full-name').value.trim();
     const email = $('email').value.trim().toLowerCase();
     const phone = $('phone').value.trim();
     const prayerHouseId = house.value;
     const password = $('password').value;
     const confirmPassword = $('confirm-password').value;
-    const claimScope = scope.value;
-    const claimOffice = office.value;
-    const patronScope = $('patron-claim-scope')?.value || '';
-    const matronScope = $('matron-claim-scope')?.value || '';
-    const chaplainScope = $('chaplain-claim')?.value || '';
-    const gender = $('member-gender')?.value || '';
+    const claimScope = selectedRole === 'prayer_house_leader' ? 'prayer_house' : selectedRole === 'parish_leader' ? 'parish' : '';
+    const claimOffice = claimScope ? office.value : '';
+    const patronScope = selectedRole === 'patron' ? $('patron-claim-scope').value : '';
+    const matronScope = selectedRole === 'matron' ? $('matron-claim-scope').value : '';
+    const chaplainScope = selectedRole === 'chaplain' ? 'parish' : '';
+    const gender = selectedRole === 'chaplain' ? 'male' : '';
+    const title = selectedRole === 'chaplain' ? chaplainTitle.value : '';
     const patronMatronClaims = [];
 
     function addPatronMatronClaims(officeName, selectedScope) {
       if (!selectedScope) return;
-      if (selectedScope === 'parish' || selectedScope === 'both') {
-        patronMatronClaims.push({ office_name: officeName, scope: 'parish' });
-      }
-      if (selectedScope === 'prayer_house' || selectedScope === 'both') {
-        patronMatronClaims.push({ office_name: officeName, scope: 'prayer_house' });
-      }
+      if (selectedScope === 'parish' || selectedScope === 'both') patronMatronClaims.push({ office_name: officeName, scope: 'parish' });
+      if (selectedScope === 'prayer_house' || selectedScope === 'both') patronMatronClaims.push({ office_name: officeName, scope: 'prayer_house' });
     }
     addPatronMatronClaims('Patron', patronScope);
     addPatronMatronClaims('Matron', matronScope);
 
-    const allowedSymbols = "!@#$%^&*()_+-=[]{};':\"\\|<>?,./`~";
-    const passwordIsStrong =
-      password.length >= 12 &&
-      /[a-z]/.test(password) &&
-      /[A-Z]/.test(password) &&
-      /[0-9]/.test(password) &&
-      [...allowedSymbols].some((character) => password.includes(character));
+    const allowedSymbols = "!@#$%^&*()_+-=[]{};':"\\|<>?,./`~";
+    const passwordIsStrong = password.length >= 12 && /[a-z]/.test(password) && /[A-Z]/.test(password)
+      && /[0-9]/.test(password) && [...allowedSymbols].some((character) => password.includes(character));
 
-    if (!passwordIsStrong) {
-      showMessage(message, 'Use at least 12 characters, with uppercase and lowercase letters, a number and a symbol.', 'error');
-      return;
+    if (!passwordIsStrong) return showMessage(message, 'Use at least 12 characters, with uppercase and lowercase letters, a number and a symbol.', 'error');
+    if (password !== confirmPassword) return showMessage(message, 'The two passwords do not match.', 'error');
+    if ((claimScope && !claimOffice) || (selectedRole === 'patron' && !patronScope) || (selectedRole === 'matron' && !matronScope)) {
+      return showMessage(message, 'Choose the appointment level and office details required for your selected registration type.', 'error');
     }
-    if (password !== confirmPassword) {
-      showMessage(message, 'The two passwords do not match.', 'error');
-      return;
-    }
-    if (claimScope && !claimOffice) {
-      showMessage(message, 'Choose the office you are claiming, or clear the claim type.', 'error');
-      return;
-    }
-    if (chaplainScope && gender !== 'male') {
-      showMessage(message, 'The Parish Chaplain slot is reserved for male members. Select Male to submit this claim.', 'error');
-      return;
+    if (chaplainScope && (gender !== 'male' || !['Father', 'Deacon'].includes(title))) {
+      return showMessage(message, 'Chaplain applicants must be male and select either Father or Deacon as their Church title.', 'error');
     }
 
     const submit = $('register-submit');
@@ -150,38 +163,32 @@ function setupRegistration() {
     submit.textContent = 'Submitting registration…';
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email, password,
         options: {
           emailRedirectTo: authCallbackUrl(),
           data: {
-            full_name: fullName,
-            phone,
-            prayer_house_id: prayerHouseId,
-            claim_scope: claimScope || null,
-            claim_office: claimOffice || null,
-            gender: gender || null,
-            chaplain_claim: chaplainScope || null,
-            patron_matron_claims: patronMatronClaims
+            full_name: fullName, phone, prayer_house_id: prayerHouseId,
+            claim_scope: claimScope || null, claim_office: claimOffice || null,
+            gender: gender || null, chaplain_claim: chaplainScope || null,
+            chaplain_title: title || null, patron_matron_claims: patronMatronClaims,
+            registration_role: selectedRole
           }
         }
       });
       if (error) throw error;
-
       if (data.session && data.user) {
         await membershipDestination(data.user);
         return;
       }
       showMessage(message, 'Registration received. We have sent a verification link to your email. Open that link to verify your address; your membership will then remain pending until an administrator approves it.', 'success');
       form.reset();
+      refreshRoleFields();
       refreshClaimFields();
-      genderField.hidden = true;
-      genderSelect.required = false;
     } catch (error) {
       showMessage(message, error.message || 'Registration could not be completed. Please try again.', 'error');
     } finally {
       submit.disabled = false;
-      submit.textContent = 'Create membership account';
+      submit.textContent = 'Submit registration';
     }
   });
 }
