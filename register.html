@@ -59,6 +59,22 @@
           </label>
           <small id="claim-note" class="auth-help">You can register as an ordinary member without claiming a leadership office.</small>
           <div class="auth-divider"></div>
+          <p class="eyebrow blue" style="margin:0">OPTIONAL PARISH CHAPLAIN APPOINTMENT</p>
+          <p class="auth-help">There is one Parish Chaplain slot. Only male members may submit a Chaplain claim, and the appointment must be verified separately. It does not grant Super Admin access.</p>
+          <label>Parish Chaplain appointment
+            <select id="chaplain-claim" name="chaplain_claim">
+              <option value="">Not claiming Parish Chaplain</option>
+              <option value="parish">I am claiming the Parish Chaplain slot</option>
+            </select>
+          </label>
+          <label id="gender-field" hidden>Gender (required for a Chaplain claim)
+            <select id="member-gender" name="gender">
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </label>
+          <div class="auth-divider"></div>
           <p class="eyebrow blue" style="margin:0">OPTIONAL PATRON &amp; MATRON APPOINTMENT</p>
           <p class="auth-help">If you currently serve as a Patron or Matron, you may submit the relevant appointment claim(s). Parish and prayer-house claims are verified separately. These appointments do not grant Super Admin access.</p>
           <label>Patron appointment
