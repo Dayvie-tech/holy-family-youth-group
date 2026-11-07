@@ -4,7 +4,7 @@ const OFFLINE_URL = "./offline.html";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.add(OFFLINE_URL))
+      .then((cache) => cache.addAll([OFFLINE_URL, "./holy-family-youth-group-logo.jpg"]))
       .then(() => self.skipWaiting())
   );
 });
