@@ -3,7 +3,7 @@ const prayerHouses = [
   "Sacred Heart Kangenge",
   "Our Lady of Assumption Gicherori",
   "St. Charles Kibugu",
-  "St. John Chrysostom Kathangariri",
+  "St. John Kathangariri",
   "Our Lady of Visitation Kianguchu",
   "St. Ruth Kathakwa",
   "St. Joseph Gatunduri"
