@@ -465,6 +465,10 @@ async function setupAdminDashboard() {
         window.location.replace('member-dashboard.html');
         return;
       }
+      const heritageLink = $('history-manager-link');
+      if (heritageLink) {
+        heritageLink.hidden = !assignments.some((assignment) => ['parish_admin', 'super_admin'].includes(assignment.access_level));
+      }
       if (assignments.some((assignment) => assignment.access_level === 'super_admin')) {
         await loadSuperAdminPanel();
       }
