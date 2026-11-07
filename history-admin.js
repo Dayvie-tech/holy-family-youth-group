@@ -21,8 +21,11 @@ function dateLabel(value) {
   if (!value) return 'Date not specified';
   return new Intl.DateTimeFormat('en-KE', { dateStyle: 'medium', timeZone: 'Africa/Nairobi' }).format(new Date(value + 'T00:00:00'));
 }
-function publicPhoto(path) {
-  return path ? supabase.storage.from('heritage-media').getPublicUrl(path).data.publicUrl : '';
+async function privatePhoto(path) {
+  if (!path) return '';
+  const result = await supabase.storage.from('heritage-media').createSignedUrl(path, 3600);
+  if (result.error) throw result.error;
+  return result.data.signedUrl;
 }
 function resetForm() {
   $('heritage-entry-form').reset();
@@ -52,7 +55,7 @@ function addAction(parent, label, callback, style = '') {
   parent.append(button);
   return button;
 }
-function renderRecord(entry, review = false) {
+async function renderRecord(entry, review = false) {
   const card = document.createElement('article');
   card.className = 'heritage-record';
   const top = document.createElement('div');
@@ -74,7 +77,7 @@ function renderRecord(entry, review = false) {
   if (entry.photo_path) {
     const img = document.createElement('img');
     img.className = 'heritage-record-photo';
-    img.src = publicPhoto(entry.photo_path);
+    img.src = await privatePhoto(entry.photo_path);
     img.alt = entry.photo_caption || entry.title;
     card.append(img);
     if (entry.photo_caption) {
@@ -181,8 +184,10 @@ async function loadEntries() {
   const queue = $('heritage-review-list');
   all.replaceChildren();
   queue.replaceChildren();
-  (results[0].data || []).forEach(entry => all.append(renderRecord(entry)));
-  (results[1].data || []).forEach(entry => queue.append(renderRecord(entry, true)));
+  const allCards = await Promise.all((results[0].data || []).map(entry => renderRecord(entry)));
+  const reviewCards = await Promise.all((results[1].data || []).map(entry => renderRecord(entry, true)));
+  allCards.forEach(card => all.append(card));
+  reviewCards.forEach(card => queue.append(card));
   if (!results[0].data || !results[0].data.length) all.textContent = 'No history records have been created yet.';
   if (!results[1].data || !results[1].data.length) queue.textContent = 'No records are waiting for review.';
 }
