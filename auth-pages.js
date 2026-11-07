@@ -735,11 +735,17 @@ import('./notifications.js').catch((error) => console.warn('Notification centre 
 function setupLogin() {
   const form = $('login-form');
   if (!form) return;
+  const submit = $('login-submit');
+
+  // auth-pages.js currently invokes setupLogin from two legacy initialisation
+  // blocks. Attach one handler only, then release the form from its connecting
+  // state once the Supabase client has loaded successfully.
+  if (form.dataset.authHandlerAttached === 'true') return;
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = $('login-message');
     hideMessage(message);
-    const submit = $('login-submit');
     submit.disabled = true;
     submit.textContent = 'Signing in…';
     try {
@@ -756,6 +762,12 @@ function setupLogin() {
       submit.textContent = 'Sign in';
     }
   });
+
+  form.dataset.authHandlerAttached = 'true';
+  form.dataset.authReady = 'true';
+  submit.disabled = false;
+  submit.textContent = 'Sign in';
+  hideMessage($('login-message'));
 }
 
 async function setupCallback() {
