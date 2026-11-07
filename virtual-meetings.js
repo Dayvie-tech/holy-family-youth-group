@@ -11,6 +11,8 @@ let currentUser = null;
 let isSuperAdmin = false;
 let assignedHouseIds = [];
 let houseNames = new Map();
+let activeJitsiApi = null;
+let jaasApiPromise = null;
 
 function status(message, type = 'info') {
   statusBox.textContent = message;
@@ -29,6 +31,75 @@ function formatDate(value) {
 function canManage(meeting) {
   return isSuperAdmin || (meeting.prayer_house_id != null && assignedHouseIds.includes(meeting.prayer_house_id));
 }
+async function loadJaasApi(appId) {
+  if (window.JitsiMeetExternalAPI) return;
+  if (!jaasApiPromise) {
+    jaasApiPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = `https://8x8.vc/${encodeURIComponent(appId)}/external_api.js`;
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error('Could not load the secure meeting service. Please refresh and try again.'));
+      document.head.append(script);
+    });
+  }
+  await jaasApiPromise;
+  if (!window.JitsiMeetExternalAPI) throw new Error('The meeting service did not initialise correctly.');
+}
+
+async function joinMeeting({ meetingId = null, guestToken = null } = {}) {
+  const roomStatus = $('meeting-room-status');
+  const guestDetails = $('guest-invite-details');
+  const roomSection = $('meeting-room-section');
+  try {
+    if (roomStatus) roomStatus.textContent = 'Checking your invitation and preparing the secure room…';
+    if (guestDetails && guestToken) guestDetails.textContent = 'Checking your invitation and preparing the secure room…';
+    const { data, error } = await supabase.functions.invoke('jaas-meeting-token', {
+      body: guestToken ? { guest_token: guestToken } : { meeting_id: meetingId }
+    });
+    if (error) throw error;
+    if (!data?.jwt || !data?.roomName || !data?.appId) throw new Error(data?.error || 'The meeting service returned an incomplete response.');
+    await loadJaasApi(data.appId);
+
+    if (activeJitsiApi) {
+      try { activeJitsiApi.dispose(); } catch (_) {}
+      activeJitsiApi = null;
+    }
+    const container = $('jaas-meeting-container');
+    container.replaceChildren();
+    $('meeting-room-title').textContent = data.meeting?.title || 'Guest meeting';
+    roomSection.hidden = false;
+    if (guestDetails && guestToken) guestDetails.textContent = 'Joining: ' + (data.meeting?.title || 'your invited meeting');
+    activeJitsiApi = new window.JitsiMeetExternalAPI('8x8.vc', {
+      roomName: data.roomName,
+      jwt: data.jwt,
+      parentNode: container,
+      width: '100%',
+      height: 640,
+      userInfo: { displayName: data.participant?.name || 'Parish member' },
+      configOverwrite: {
+        prejoinPageEnabled: true,
+        startWithAudioMuted: true,
+        startWithVideoMuted: true,
+        disableDeepLinking: true
+      }
+    });
+    activeJitsiApi.addEventListener('videoConferenceJoined', () => {
+      if (roomStatus) roomStatus.textContent = 'You are connected. Welcome to the fellowship!';
+      if (guestDetails && guestToken) guestDetails.textContent = 'You are connected to the meeting.';
+    });
+    activeJitsiApi.addEventListener('videoConferenceLeft', () => {
+      if (roomStatus) roomStatus.textContent = 'You have left the meeting.';
+    });
+    roomSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (error) {
+    const message = error?.context?.body?.error || error?.message || 'Unable to join this meeting.';
+    if (roomStatus) roomStatus.textContent = message;
+    if (guestDetails && guestToken) guestDetails.textContent = message;
+    else status(message, 'error');
+  }
+}
+
 function makeInviteToken() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -62,7 +133,10 @@ async function loadMeetings() {
     card.append(top);
     if (meeting.description) card.append(node('p','meeting-description',meeting.description));
     const actions = node('div','meeting-actions');
-    actions.append(node('span','meeting-meta','Live video joining will be added in the next milestone.'));
+    const join = node('button','','Join live meeting');
+    join.type = 'button';
+    join.addEventListener('click', () => joinMeeting({ meetingId: meeting.id }));
+    actions.append(join);
     if (canManage(meeting)) {
       const cancel = node('button','danger','Cancel meeting');
       cancel.type = 'button';
@@ -121,14 +195,22 @@ async function loadGuestInvite(token) {
     return;
   }
   $('guest-invite-title').textContent='Your guest invitation';
-  $('guest-invite-details').textContent='You have received a guest invitation to a Holy Family Nguviu Parish youth virtual meeting. Please contact the person who shared this link for the meeting schedule and details.';
+  $('guest-invite-details').textContent='You have received a private invitation to a Holy Family Nguviu Parish youth virtual meeting. Select below when the meeting is about to begin.';
+  const joinGuest = node('button','button','Join invited meeting');
+  joinGuest.type = 'button';
+  joinGuest.addEventListener('click', () => joinMeeting({ guestToken: token }));
+  $('guest-invite-panel').append(joinGuest);
   $('guest-invite-panel').hidden=false;
   loading.hidden=true;
 }
 
 async function initialize() {
   const guestToken=new URLSearchParams(window.location.search).get('guest');
-  if(guestToken){await loadGuestInvite(guestToken);return;}
+  if(guestToken){
+    window.history.replaceState({}, document.title, window.location.pathname);
+    await loadGuestInvite(guestToken);
+    return;
+  }
   try {
     const {data:sessionData}=await supabase.auth.getSession();
     currentUser=sessionData.session?.user;
@@ -187,5 +269,13 @@ form.addEventListener('submit',async(event)=>{
 });
 
 $('meeting-refresh').addEventListener('click',()=>loadMeetings().catch(error=>status(error.message,'error')));
+$('meeting-room-leave').addEventListener('click', () => {
+  if (activeJitsiApi) {
+    try { activeJitsiApi.executeCommand('hangup'); activeJitsiApi.dispose(); } catch (_) {}
+    activeJitsiApi = null;
+  }
+  $('jaas-meeting-container').replaceChildren();
+  $('meeting-room-section').hidden = true;
+});
 $('meeting-sign-out').addEventListener('click',async()=>{await supabase.auth.signOut();window.location.replace('index.html');});
 initialize();

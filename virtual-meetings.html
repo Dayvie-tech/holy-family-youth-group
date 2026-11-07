@@ -30,7 +30,7 @@
         <p class="eyebrow blue">PERSONAL MEETING INVITATION</p>
         <h1 id="guest-invite-title">You're invited</h1>
         <p id="guest-invite-details"></p>
-        <p class="meeting-note">Keep this invitation link private. Ask the meeting host for the schedule and details. Secure guest verification and live video joining will be enabled in the next development milestone.</p>
+        <p class="meeting-note">Keep this invitation link private. Use the join button below when the meeting room opens.</p>
       </section>
 
       <section id="virtual-meetings-app" hidden>
@@ -73,6 +73,14 @@
           <div id="meeting-list" class="meeting-list" aria-live="polite"><div class="admin-empty">Loading meetings…</div></div>
         </section>
       </section>
+
+        <section id="meeting-room-section" class="meeting-room-section" hidden>
+          <div class="meeting-section-heading">
+            <div><p class="eyebrow blue">LIVE FELLOWSHIP</p><h2 id="meeting-room-title">Meeting room</h2><p id="meeting-room-status" role="status">Preparing secure meeting access…</p></div>
+            <button id="meeting-room-leave" class="button button-light" type="button">Leave meeting</button>
+          </div>
+          <div id="jaas-meeting-container" class="jaas-meeting-container"></div>
+        </section>
       <div id="meeting-loading" class="admin-empty">Checking your access…</div>
     </div>
   </main>
