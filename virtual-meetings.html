@@ -72,6 +72,14 @@
           <div class="meeting-section-heading"><div><p class="eyebrow blue">YOUR COMMUNITY</p><h2>Upcoming meetings</h2><p>Meetings visible to your membership and invitations.</p></div><button id="meeting-refresh" class="button button-light" type="button">Refresh</button></div>
           <div id="meeting-list" class="meeting-list" aria-live="polite"><div class="admin-empty">Loading meetings…</div></div>
         </section>
+
+        <section id="meeting-room-section" class="meeting-room-section" hidden>
+          <div class="meeting-section-heading">
+            <div><p class="eyebrow blue">LIVE FELLOWSHIP</p><h2 id="meeting-room-title">Meeting room</h2><p id="meeting-room-status" role="status">Preparing secure meeting access…</p></div>
+            <button id="meeting-room-leave" class="button button-light" type="button">Leave meeting</button>
+          </div>
+          <div id="jaas-meeting-container" class="jaas-meeting-container"></div>
+        </section>
       </section>
       <div id="meeting-loading" class="admin-empty">Checking your access…</div>
     </div>
