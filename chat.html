@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#168fc9">
-  <meta name="description" content="Member chat for Holy Family Youth Group.">
+  <meta name="description" content="Secure member chat for Holy Family Youth Group.">
   <title>Member chat | Holy Family Youth Group</title>
   <link rel="icon" href="holy-family-youth-group-logo.jpg" type="image/jpeg">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="chat.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -26,18 +27,36 @@
         <a href="members.html">Members</a><a href="leadership.html">Leadership</a><a href="events.html">Events</a>
         <a href="announcements.html">Announcements</a><a href="contributions.html">Contributions</a>
         <a href="youth-voice.html">Youth Voice</a><a href="history.html">History</a><a href="chat.html" class="active">Chat</a>
-        <a href="contact.html">Contact</a><a class="nav-login" href="login.html">Member login</a>
+        <a href="contact.html">Contact</a><a class="nav-login" href="member-dashboard.html">Member portal</a>
       </nav>
     </div>
   </header>
   <main id="main">
-    <section class="page-hero"><div class="container"><p class="eyebrow">HOLY FAMILY YOUTH GROUP</p><h1>Member chat</h1><p>A place for our parish youth community to connect respectfully.</p></div></section>
-    <section class="section"><div class="container"><div class="content-card">
-      <p class="eyebrow blue">COMMUNITY CONVERSATION</p><h2>Stay connected</h2>
-      <p>The chat module is planned to include a parish-wide room, individual prayer-house rooms and a leadership room with access restrictions.</p>
-      <div class="placeholder-note">Chat is not active yet. Secure member authentication, room permissions, message moderation and privacy safeguards must be implemented before conversations are enabled.</div>
-      <p style="margin-top:22px"><a class="button button-light" href="login.html">Go to member login</a></p>
-    </div></div></section>
+    <section class="page-hero"><div class="container"><p class="eyebrow">HOLY FAMILY YOUTH GROUP</p><h1>Community chat</h1><p>Faith, fellowship and respectful conversation — together.</p></div></section>
+    <section class="section chat-section">
+      <div class="container">
+        <div id="chat-status" class="chat-status" role="status" aria-live="polite">Checking your member access…</div>
+        <div id="chat-app" class="chat-app" hidden>
+          <aside class="chat-sidebar">
+            <div class="chat-sidebar-heading"><span class="eyebrow blue">YOUR SPACES</span><h2>Conversations</h2><p id="chat-member-greeting"></p></div>
+            <nav id="chat-room-list" class="chat-room-list" aria-label="Chat rooms"></nav>
+            <div class="chat-sidebar-note">You only see rooms your approved membership or leadership role allows you to access.</div>
+          </aside>
+          <section class="chat-panel" aria-label="Selected conversation">
+            <header class="chat-panel-header">
+              <div><span id="chat-room-type" class="chat-room-type">COMMUNITY</span><h2 id="chat-room-name">Choose a conversation</h2><p id="chat-room-description">Select a chat space to get started.</p></div>
+              <span class="chat-live-indicator"><i></i> Live chat</span>
+            </header>
+            <div id="chat-messages" class="chat-messages" aria-live="polite"><div class="chat-empty">Choose a conversation to view messages.</div></div>
+            <form id="chat-compose" class="chat-compose">
+              <label class="sr-only" for="chat-message-input">Write a message</label>
+              <textarea id="chat-message-input" rows="2" maxlength="2000" placeholder="Write a message…" required disabled></textarea>
+              <div class="chat-compose-footer"><span>Be kind. Keep our conversations respectful.</span><button id="chat-send" class="button button-light" type="submit" disabled>Send message <span>→</span></button></div>
+            </form>
+          </section>
+        </div>
+      </div>
+    </section>
   </main>
   <footer class="site-footer"><div class="container footer-main">
     <div class="footer-brand"><img src="holy-family-youth-group-logo.jpg" alt=""><div><strong>HOLY FAMILY YOUTH GROUP</strong><p>I WILL NOT REST TILL CHRIST IS KNOWN TO ALL.</p></div></div>
@@ -45,5 +64,6 @@
     <div class="footer-social"><strong>Follow our community</strong><a href="https://www.facebook.com/search/top?q=Holy%20Family%20youth%20group" target="_blank" rel="noopener">Facebook · Holy Family youth group</a><a href="https://www.tiktok.com/@holyfamilynguviu_ycs" target="_blank" rel="noopener">TikTok · @holyfamilynguviu_ycs</a></div>
   </div><div class="footer-bottom"><div class="container">© <span id="current-year"></span> Holy Family Youth Group. All rights reserved. <span>Faith · Community · Service</span></div></div></footer>
   <script src="app.js"></script>
+  <script type="module" src="chat.js"></script>
 </body>
 </html>
