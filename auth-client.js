@@ -1,6 +1,6 @@
 // Load the pinned Supabase SDK without leaving the portal stuck on "Connecting…".
 // A CDN can stall without rejecting, so every loading attempt has a timeout.
-const SDK_VERSION = '2.102.0';
+const SDK_VERSION = '2.119.0';
 const SDK_TIMEOUT_MS = 12000;
 
 function withTimeout(promise, source) {
