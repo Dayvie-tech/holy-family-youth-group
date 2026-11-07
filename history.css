@@ -66,3 +66,5 @@
 .heritage-memory-form input,.heritage-memory-form select,.heritage-memory-form textarea{width:100%;padding:10px;border:1px solid #cbdde7;border-radius:8px;font:inherit;font-size:.85rem}
 .heritage-memory-form textarea{resize:vertical}
 .heritage-memory-form button{justify-self:start}
+
+.history-collection-grid{grid-template-columns:1fr}
