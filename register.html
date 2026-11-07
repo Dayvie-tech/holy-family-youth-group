@@ -59,6 +59,26 @@
           </label>
           <small id="claim-note" class="auth-help">You can register as an ordinary member without claiming a leadership office.</small>
           <div class="auth-divider"></div>
+          <p class="eyebrow blue" style="margin:0">OPTIONAL PATRON &amp; MATRON APPOINTMENT</p>
+          <p class="auth-help">If you currently serve as a Patron or Matron, you may submit the relevant appointment claim(s). Parish and prayer-house claims are verified separately. These appointments do not grant Super Admin access.</p>
+          <label>Patron appointment
+            <select id="patron-claim-scope" name="patron_claim_scope">
+              <option value="">Not claiming Patron</option>
+              <option value="prayer_house">My prayer house only</option>
+              <option value="parish">Parish level only</option>
+              <option value="both">Both parish and my prayer house</option>
+            </select>
+          </label>
+          <label>Matron appointment
+            <select id="matron-claim-scope" name="matron_claim_scope">
+              <option value="">Not claiming Matron</option>
+              <option value="prayer_house">My prayer house only</option>
+              <option value="parish">Parish level only</option>
+              <option value="both">Both parish and my prayer house</option>
+            </select>
+          </label>
+          <small class="auth-help">Each parish position has one slot, and each prayer house has one Patron and one Matron slot. Claims are subject to verification.</small>
+          <div class="auth-divider"></div>
           <label>Password
             <input id="password" name="password" type="password" autocomplete="new-password" minlength="12" required placeholder="Create a strong password">
             <small>Use at least 12 characters, including uppercase and lowercase letters, a number and a symbol.</small>

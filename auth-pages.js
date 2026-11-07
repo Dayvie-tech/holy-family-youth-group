@@ -84,6 +84,21 @@ function setupRegistration() {
     const confirmPassword = $('confirm-password').value;
     const claimScope = scope.value;
     const claimOffice = office.value;
+    const patronScope = $('patron-claim-scope')?.value || '';
+    const matronScope = $('matron-claim-scope')?.value || '';
+    const patronMatronClaims = [];
+
+    function addPatronMatronClaims(officeName, selectedScope) {
+      if (!selectedScope) return;
+      if (selectedScope === 'parish' || selectedScope === 'both') {
+        patronMatronClaims.push({ office_name: officeName, scope: 'parish' });
+      }
+      if (selectedScope === 'prayer_house' || selectedScope === 'both') {
+        patronMatronClaims.push({ office_name: officeName, scope: 'prayer_house' });
+      }
+    }
+    addPatronMatronClaims('Patron', patronScope);
+    addPatronMatronClaims('Matron', matronScope);
 
     const allowedSymbols = "!@#$%^&*()_+-=[]{};':\"\\|<>?,./`~";
     const passwordIsStrong =
@@ -120,7 +135,8 @@ function setupRegistration() {
             phone,
             prayer_house_id: prayerHouseId,
             claim_scope: claimScope || null,
-            claim_office: claimOffice || null
+            claim_office: claimOffice || null,
+            patron_matron_claims: patronMatronClaims
           }
         }
       });
