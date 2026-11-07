@@ -19,10 +19,10 @@ create table if not exists public.prayer_houses (
 insert into public.prayer_houses (id, name, slug) values
   (1, 'Holy Family Nguviu', 'holy-family-nguvuiu'),
   (2, 'Sacred Heart Kangenge', 'sacred-heart-kangenge'),
-  (3, 'Our Lady of Assumption Gicherori', 'our-lady-of-assumption-gicherori'),
+  (3, 'Our Lady of Visitation Gicherori', 'our-lady-of-assumption-gicherori'),
   (4, 'St. Charles Kibugu', 'st-charles-kibugu'),
   (5, 'St. John Chrysostom Kathangariri', 'st-john-chrysostom-kathangariri'),
-  (6, 'Our Lady of Visitation Kianguchu', 'our-lady-of-visitation-kianguchu'),
+  (6, 'Our Lady of Assumption Kianguchu', 'our-lady-of-visitation-kianguchu'),
   (7, 'St. Ruth Kathakwa', 'st-ruth-kathakwa'),
   (8, 'St. Joseph Gatunduri', 'st-joseph-gatunduri')
 on conflict (slug) do update set name = excluded.name;
