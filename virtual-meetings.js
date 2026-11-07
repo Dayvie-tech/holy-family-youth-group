@@ -206,7 +206,11 @@ async function loadGuestInvite(token) {
 
 async function initialize() {
   const guestToken=new URLSearchParams(window.location.search).get('guest');
-  if(guestToken){await loadGuestInvite(guestToken);return;}
+  if(guestToken){
+    window.history.replaceState({}, document.title, window.location.pathname);
+    await loadGuestInvite(guestToken);
+    return;
+  }
   try {
     const {data:sessionData}=await supabase.auth.getSession();
     currentUser=sessionData.session?.user;
