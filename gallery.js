@@ -6,12 +6,14 @@ const dateLabel = value => value
   ? new Intl.DateTimeFormat('en-KE', { dateStyle: 'medium', timeZone: 'Africa/Nairobi' }).format(new Date(value + 'T00:00:00'))
   : 'Date not recorded';
 
-function photoCard(photo) {
+async function photoCard(photo) {
   const figure = document.createElement('figure');
   figure.className = 'gallery-photo';
   const image = document.createElement('img');
   image.loading = 'lazy';
-  image.src = supabase.storage.from('gallery-media').getPublicUrl(photo.storage_path).data.publicUrl;
+  const signed = await supabase.storage.from('gallery-media').createSignedUrl(photo.storage_path, 3600);
+  if (signed.error) throw signed.error;
+  image.src = signed.data.signedUrl;
   image.alt = photo.alt_text;
   const caption = document.createElement('figcaption');
   caption.textContent = photo.caption || photo.alt_text;
@@ -19,7 +21,7 @@ function photoCard(photo) {
   return figure;
 }
 
-function albumCard(album, photos, houseName) {
+async function albumCard(album, photos, houseName) {
   const card = document.createElement('article');
   card.className = 'gallery-album';
   const heading = document.createElement('div');
@@ -36,7 +38,8 @@ function albumCard(album, photos, houseName) {
   card.append(heading);
   const grid = document.createElement('div');
   grid.className = 'gallery-photo-grid';
-  photos.forEach(photo => grid.append(photoCard(photo)));
+  const photoCards = await Promise.all(photos.map(photoCard));
+  photoCards.forEach(photo => grid.append(photo));
   if (photos.length) card.append(grid);
   return card;
 }
@@ -57,7 +60,8 @@ async function loadGallery() {
       photos.get(photo.album_id).push(photo);
     });
     root.replaceChildren();
-    (albumsResult.data || []).forEach(album => root.append(albumCard(album, photos.get(album.id) || [], houses.get(album.prayer_house_id) || '')));
+    const cards = await Promise.all((albumsResult.data || []).map(album => albumCard(album, photos.get(album.id) || [], houses.get(album.prayer_house_id) || '')));
+    cards.forEach(card => root.append(card));
     if (!albumsResult.data?.length) {
       root.innerHTML = '<div class="gallery-empty">Our public photo archive is ready. Approved albums will appear here as they are published.</div>';
       status.textContent = 'No public albums have been published yet.';
