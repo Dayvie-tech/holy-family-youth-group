@@ -160,7 +160,7 @@ function setupRegistration() {
 
     if (!passwordIsStrong) return showMessage(message, 'Use at least 12 characters, with uppercase and lowercase letters, a number and a symbol.', 'error');
     if (password !== confirmPassword) return showMessage(message, 'The two passwords do not match.', 'error');
-    if ((claimScope && !claimOffice) || (selectedRole === 'patron' && !patronScope) || (selectedRole === 'matron' && !matronScope)) {
+    if ((claimScope && !selectedOffice) || (selectedRole === 'patron' && !patronScope) || (selectedRole === 'matron' && !matronScope)) {
       return showMessage(message, 'Choose the appointment level and office details required for your selected registration type.', 'error');
     }
     if (chaplainScope && (gender !== 'male' || !['Father', 'Deacon'].includes(title))) {
