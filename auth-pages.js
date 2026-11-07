@@ -71,6 +71,16 @@ function setupRegistration() {
   scope.addEventListener('change', refreshClaimFields);
   refreshClaimFields();
 
+  const chaplainClaim = $('chaplain-claim');
+  const genderField = $('gender-field');
+  const genderSelect = $('member-gender');
+  chaplainClaim?.addEventListener('change', () => {
+    const claimingChaplain = chaplainClaim.value === 'parish';
+    genderField.hidden = !claimingChaplain;
+    genderSelect.required = claimingChaplain;
+    if (!claimingChaplain) genderSelect.value = '';
+  });
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = $('registration-message');
@@ -86,6 +96,8 @@ function setupRegistration() {
     const claimOffice = office.value;
     const patronScope = $('patron-claim-scope')?.value || '';
     const matronScope = $('matron-claim-scope')?.value || '';
+    const chaplainScope = $('chaplain-claim')?.value || '';
+    const gender = $('member-gender')?.value || '';
     const patronMatronClaims = [];
 
     function addPatronMatronClaims(officeName, selectedScope) {
@@ -120,6 +132,10 @@ function setupRegistration() {
       showMessage(message, 'Choose the office you are claiming, or clear the claim type.', 'error');
       return;
     }
+    if (chaplainScope && gender !== 'male') {
+      showMessage(message, 'The Parish Chaplain slot is reserved for male members. Select Male to submit this claim.', 'error');
+      return;
+    }
 
     const submit = $('register-submit');
     submit.disabled = true;
@@ -136,6 +152,8 @@ function setupRegistration() {
             prayer_house_id: prayerHouseId,
             claim_scope: claimScope || null,
             claim_office: claimOffice || null,
+            gender: gender || null,
+            chaplain_claim: chaplainScope || null,
             patron_matron_claims: patronMatronClaims
           }
         }
@@ -149,6 +167,8 @@ function setupRegistration() {
       showMessage(message, 'Registration received. We have sent a verification link to your email. Open that link to verify your address; your membership will then remain pending until an administrator approves it.', 'success');
       form.reset();
       refreshClaimFields();
+      genderField.hidden = true;
+      genderSelect.required = false;
     } catch (error) {
       showMessage(message, error.message || 'Registration could not be completed. Please try again.', 'error');
     } finally {
@@ -435,7 +455,7 @@ async function setupAdminDashboard() {
     const memberIds = [...new Set(claims.map((claim) => claim.member_id))];
     const { data: members, error: membersError } = await supabase
       .from('profiles')
-      .select('id, full_name, primary_prayer_house_id')
+      .select('id, full_name, primary_prayer_house_id, gender')
       .in('id', memberIds);
     if (membersError) throw membersError;
     const memberMap = new Map((members || []).map((member) => [member.id, member]));
@@ -457,7 +477,8 @@ async function setupAdminDashboard() {
 
       const meta = document.createElement('p');
       meta.className = 'application-meta';
-      meta.textContent = claim.office_name + ' · Submitted ' + new Date(claim.nominated_at).toLocaleDateString();
+      meta.textContent = claim.office_name + ' · Submitted ' + new Date(claim.nominated_at).toLocaleDateString()
+        + (claim.office_name === 'Chaplain' ? ' · Gender: ' + (member?.gender || 'Not recorded') : '');
 
       const actions = document.createElement('div');
       actions.className = 'application-actions';
