@@ -224,7 +224,8 @@ async function initialise() {
   app.hidden = false;
   status.hidden = true;
   renderRooms();
-  const firstRoom = rooms.find((r) => r.room_type === 'general') || rooms[0];
+  const requestedRoomId = new URLSearchParams(window.location.search).get('room');
+  const firstRoom = rooms.find((r) => r.id === requestedRoomId) || rooms.find((r) => r.room_type === 'general') || rooms[0];
   await selectRoom(firstRoom);
 }
 window.addEventListener('beforeunload', () => {
