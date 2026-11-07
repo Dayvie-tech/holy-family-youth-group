@@ -58,6 +58,16 @@
       <div class="container history-contribute-inner">
         <div><p class="eyebrow">HELP PRESERVE OUR HERITAGE</p><h2>Have a memory worth preserving?</h2><p>Former and current members can help the parish build an accurate archive by sharing old photographs, programme records, project reports and confirmed milestones with the authorised leadership.</p></div>
         <a class="button history-contact-button" href="contact.html">Contact the parish</a>
+        <form id="heritage-memory-form" class="heritage-memory-form" hidden>
+          <h3>Share a memory with the archive</h3>
+          <p>Approved members can submit a story for review. It will not appear publicly until authorised parish leadership approves it.</p>
+          <label>Your memory title<input id="memory-title" type="text" minlength="3" maxlength="180" required></label>
+          <label>Category<select id="memory-category" required><option value="beginnings">Our beginnings</option><option value="faith-fellowship">Faith & fellowship</option><option value="leadership-service">Leadership & service</option><option value="projects-milestones">Projects & milestones</option><option value="photo-memories">Photo memories</option></select></label>
+          <label>Date (optional)<input id="memory-date" type="date"></label>
+          <label>Memory / details<textarea id="memory-body" rows="4" minlength="10" maxlength="20000" required></textarea></label>
+          <button class="button" type="submit">Submit memory for review</button>
+          <p id="memory-submit-status" role="status" aria-live="polite"></p>
+        </form>
       </div>
     </section>
   </main>
