@@ -39,6 +39,30 @@
           <div id="super-admin-office-list" class="super-admin-office-list" aria-live="polite">
             <div class="admin-empty">Loading office holders…</div>
           </div>
+          <section class="member-management-section" aria-labelledby="member-management-title">
+            <div class="admin-section-heading">
+              <h3 id="member-management-title">Member Management</h3>
+              <p>Remove inactive members from active membership without deleting their accounts or records. Only Super Admins can use these controls.</p>
+            </div>
+            <label class="member-roster-search-label" for="member-roster-search">Find a member</label>
+            <input id="member-roster-search" class="member-roster-search" type="search" placeholder="Search by member or prayer house">
+            <div class="member-roster-columns">
+              <section aria-labelledby="active-members-title">
+                <h4 id="active-members-title">Active members (<span id="active-member-count">0</span>)</h4>
+                <div id="active-member-roster" class="application-list" aria-live="polite">
+                  <div class="admin-empty">Loading active members…</div>
+                </div>
+              </section>
+              <section aria-labelledby="suspended-members-title">
+                <h4 id="suspended-members-title">Removed members (<span id="suspended-member-count">0</span>)</h4>
+                <p class="admin-footnote">Returning a member moves them to pending review. They cannot sign in until an administrator approves them again.</p>
+                <div id="suspended-member-roster" class="application-list" aria-live="polite">
+                  <div class="admin-empty">Loading removed members…</div>
+                </div>
+              </section>
+            </div>
+            <p class="admin-footnote">Members with active administrator appointments must first have those appointments ended or transferred. This protects the administration workspace.</p>
+          </section>
           <form id="super-admin-assignment-form" class="super-admin-assignment-form">
             <h3>Appoint or transfer an office</h3>
             <label for="super-admin-office">Super Admin office</label>
