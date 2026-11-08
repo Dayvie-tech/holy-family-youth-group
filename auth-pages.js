@@ -389,18 +389,27 @@ async function setupAdminDashboard() {
   const memberSelect = $('super-admin-member');
   const superAdminOffices = ['Youth Chaplain', 'Youth Matron', 'Youth Patron', 'Parish Moderator'];
   let currentAdminUserId = null;
+  let renderMemberRoster = () => {};
+  const rosterSearch = $('member-roster-search');
+  rosterSearch?.addEventListener('input', () => renderMemberRoster());
 
   async function loadSuperAdminPanel(currentUserId) {
     if (!superAdminPanel) return;
     superAdminPanel.hidden = false;
     officeList.innerHTML = '<div class="admin-empty">Loading office holders…</div>';
-    const [membersResult, assignmentsResult] = await Promise.all([
-      supabase.from('profiles').select('id, full_name').eq('membership_status', 'approved').order('full_name'),
-      supabase.from('admin_assignments').select('id, user_id, super_admin_office').eq('access_level', 'super_admin').eq('is_active', true)
+    const [membersResult, suspendedResult, assignmentsResult, housesResult] = await Promise.all([
+      supabase.from('profiles').select('id, full_name, primary_prayer_house_id').eq('membership_status', 'approved').order('full_name'),
+      supabase.from('profiles').select('id, full_name, primary_prayer_house_id').eq('membership_status', 'suspended').order('full_name'),
+      supabase.from('admin_assignments').select('id, user_id, super_admin_office').eq('access_level', 'super_admin').eq('is_active', true),
+      supabase.from('prayer_houses').select('id, name')
     ]);
     if (membersResult.error) throw membersResult.error;
+    if (suspendedResult.error) throw suspendedResult.error;
     if (assignmentsResult.error) throw assignmentsResult.error;
+    if (housesResult.error) throw housesResult.error;
     const members = membersResult.data || [];
+    const suspendedMembers = suspendedResult.data || [];
+    const houseNames = new Map((housesResult.data || []).map((house) => [house.id, house.name]));
     const holders = new Map((assignmentsResult.data || []).map((item) => [item.super_admin_office, item]));
     const names = new Map(members.map((member) => [member.id, member.full_name]));
     officeList.replaceChildren();
@@ -458,6 +467,101 @@ async function setupAdminDashboard() {
       }
       officeList.append(card);
     });
+    renderMemberRoster = () => {
+      const searchTerm = (rosterSearch?.value || '').trim().toLocaleLowerCase();
+
+      function renderMemberCards(container, rows, action) {
+        if (!container) return;
+        container.replaceChildren();
+        const filtered = rows.filter((member) => {
+          const house = houseNames.get(member.primary_prayer_house_id) || '';
+          return (member.full_name + ' ' + house).toLocaleLowerCase().includes(searchTerm);
+        });
+        if (!filtered.length) {
+          const empty = document.createElement('div');
+          empty.className = 'admin-empty';
+          empty.textContent = searchTerm ? 'No members match this search.' : (action === 'remove'
+            ? 'There are no approved members to manage.'
+            : 'There are no removed members awaiting re-approval.');
+          container.append(empty);
+          return;
+        }
+
+        filtered.forEach((member) => {
+          const card = document.createElement('article');
+          card.className = 'application-card';
+          const heading = document.createElement('div');
+          heading.className = 'application-heading';
+          const name = document.createElement('h3');
+          name.textContent = member.full_name;
+          const house = document.createElement('span');
+          house.className = 'application-house';
+          house.textContent = houseNames.get(member.primary_prayer_house_id) || 'Prayer house not set';
+          heading.append(name, house);
+
+          const meta = document.createElement('p');
+          meta.className = 'application-meta';
+          meta.textContent = action === 'remove'
+            ? 'Approved member · Active membership'
+            : 'Suspended member · Not able to sign in';
+
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = action === 'remove' ? 'button secondary-action' : 'button';
+          button.textContent = action === 'remove' ? 'Remove from active membership' : 'Return to pending approval';
+
+          button.addEventListener('click', async () => {
+            if (action === 'remove' && !window.confirm(
+              'Remove ' + member.full_name + ' from active membership? They will lose portal access, but their account and existing records will be kept. They can return only after being placed back in pending review and approved.'
+            )) return;
+            if (action === 'restore' && !window.confirm(
+              'Move ' + member.full_name + ' back to pending membership review? They will not regain access until an administrator approves them again.'
+            )) return;
+
+            button.disabled = true;
+            button.textContent = action === 'remove' ? 'Removing…' : 'Returning to review…';
+            hideMessage(superAdminStatus);
+            try {
+              const rpcName = action === 'remove'
+                ? 'super_admin_remove_member'
+                : 'super_admin_return_member_for_review';
+              const { error } = await supabase.rpc(rpcName, { p_target_member_id: member.id });
+              if (error) throw error;
+
+              showMessage(superAdminStatus, action === 'remove'
+                ? member.full_name + ' has been removed from active membership. Their records have been preserved.'
+                : member.full_name + ' is now pending review. Approve the application below when ready.',
+                'success');
+
+              if (action === 'restore') {
+                await loadApplications();
+              } else {
+                await loadSuperAdminPanel(currentUserId);
+              }
+            } catch (error) {
+              showMessage(superAdminStatus, error.message || 'The membership status could not be changed.', 'error');
+              button.disabled = false;
+              button.textContent = action === 'remove' ? 'Remove from active membership' : 'Return to pending approval';
+            }
+          });
+
+          const actions = document.createElement('div');
+          actions.className = 'application-actions';
+          actions.append(button);
+          card.append(heading, meta, actions);
+          container.append(card);
+        });
+      }
+
+      const activeCount = $('active-member-count');
+      const suspendedCount = $('suspended-member-count');
+      if (activeCount) activeCount.textContent = String(members.length);
+      if (suspendedCount) suspendedCount.textContent = String(suspendedMembers.length);
+      renderMemberCards($('active-member-roster'), members, 'remove');
+      renderMemberCards($('suspended-member-roster'), suspendedMembers, 'restore');
+    };
+    renderMemberRoster();
+
     memberSelect.replaceChildren();
     const placeholder = document.createElement('option');
     placeholder.value = '';
