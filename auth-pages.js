@@ -568,6 +568,92 @@ async function setupAdminDashboard() {
     };
     renderMemberRoster();
 
+    async function loadLeadershipAppointments() {
+      const container = $('active-leadership-appointments');
+      if (!container) return;
+      container.innerHTML = '<div class="admin-empty">Loading active leadership appointments…</div>';
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: appointments, error } = await supabase
+        .from('appointments')
+        .select('id, member_id, member_display_name, office_name, scope, prayer_house_id, effective_from, effective_until')
+        .eq('verification_status', 'verified')
+        .or('effective_until.is.null,effective_until.gt.' + today)
+        .or('effective_from.is.null,effective_from.lte.' + today)
+        .order('scope')
+        .order('office_name');
+
+      if (error) {
+        container.innerHTML = '';
+        const problem = document.createElement('div');
+        problem.className = 'admin-empty';
+        problem.textContent = 'Active leadership appointments could not be loaded: ' + (error.message || 'Please refresh and try again.');
+        container.append(problem);
+        return;
+      }
+
+      container.replaceChildren();
+      if (!appointments?.length) {
+        const empty = document.createElement('div');
+        empty.className = 'admin-empty';
+        empty.textContent = 'There are no active verified leadership appointments to manage.';
+        container.append(empty);
+        return;
+      }
+
+      appointments.forEach((appointment) => {
+        const card = document.createElement('article');
+        card.className = 'application-card';
+        const heading = document.createElement('div');
+        heading.className = 'application-heading';
+        const name = document.createElement('h3');
+        name.textContent = appointment.member_display_name || 'Member';
+        const scope = document.createElement('span');
+        scope.className = 'claim-scope-tag';
+        scope.textContent = appointment.scope === 'parish'
+          ? 'Parish-wide'
+          : (houseNames.get(appointment.prayer_house_id) || 'Prayer-house');
+        heading.append(name, scope);
+
+        const meta = document.createElement('p');
+        meta.className = 'application-meta';
+        meta.textContent = appointment.office_name + ' · Verified leadership appointment';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'button leadership-end-button';
+        button.textContent = 'End appointment';
+        button.addEventListener('click', async () => {
+          const memberName = appointment.member_display_name || 'this member';
+          const confirmed = window.confirm(
+            'End ' + memberName + '’s ' + appointment.office_name + ' appointment? Their ordinary membership, account, contributions and existing records will remain unchanged.'
+          );
+          if (!confirmed) return;
+          button.disabled = true;
+          button.textContent = 'Ending appointment…';
+          try {
+            const { error: endError } = await supabase.rpc('end_leadership_appointment', {
+              p_appointment_id: appointment.id
+            });
+            if (endError) throw endError;
+            await loadSuperAdminPanel(currentAdminUserId);
+            showMessage(superAdminStatus, memberName + '’s ' + appointment.office_name + ' appointment has ended. Their membership remains approved and their appointment history has been preserved.', 'success');
+          } catch (endError) {
+            showMessage(superAdminStatus, endError.message || 'The leadership appointment could not be ended.', 'error');
+            button.disabled = false;
+            button.textContent = 'End appointment';
+          }
+        });
+
+        const actions = document.createElement('div');
+        actions.className = 'application-actions';
+        actions.append(button);
+        card.append(heading, meta, actions);
+        container.append(card);
+      });
+    }
+
+    await loadLeadershipAppointments();
+
     memberSelect.replaceChildren();
     const placeholder = document.createElement('option');
     placeholder.value = '';
