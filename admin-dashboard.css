@@ -4,3 +4,14 @@
 .claim-count-row{display:flex;align-items:center;gap:8px;margin-top:8px!important;font-size:.82rem}.claim-count-row strong{color:var(--deep);font-size:1.1rem}
 
 .super-admin-step-down{justify-self:start;border:1px solid #c7d7e1!important;color:var(--deep)!important;background:#fff!important;padding:8px 12px!important;font-size:.82rem}.super-admin-step-down:hover{background:#fff7f5!important;border-color:#d9a39a!important}@media(max-width:600px){.super-admin-step-down{width:100%}}
+
+.member-management-section{margin:24px 0;padding:20px;background:#fff;border:1px solid var(--line);border-radius:14px}
+.member-management-section h3{margin:0 0 6px;color:var(--deep);font-size:1.25rem}
+.member-management-section h4{margin:18px 0 10px;color:var(--deep);font-size:1rem}
+.member-roster-search-label{display:block;margin:14px 0 6px;color:var(--deep);font-size:.85rem;font-weight:650}
+.member-roster-search{width:100%;min-height:44px;padding:10px 12px;border:1px solid #c7d7e1;border-radius:9px;background:#fff;color:var(--deep);font:inherit}
+.member-roster-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:8px}
+.member-management-section .application-card{padding:15px}
+.member-management-section .application-heading h3{font-size:1rem}
+.member-management-section .application-actions button{white-space:normal}
+@media(max-width:700px){.member-management-section{padding:15px}.member-roster-columns{grid-template-columns:1fr}}
