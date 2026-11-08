@@ -23,3 +23,13 @@
 .leadership-management-section .application-actions button{white-space:normal}
 .leadership-end-button{background:#647987!important}
 @media(max-width:700px){.leadership-management-section{padding:15px}.leadership-management-section .application-actions button{width:100%}}
+
+
+.leadership-assignment-section{margin:24px 0;padding:20px;background:#fff;border:1px solid var(--line);border-radius:14px}
+.leadership-assignment-section h3{margin:0 0 6px;color:var(--deep);font-size:1.25rem}
+.leadership-assignment-form{display:grid;gap:10px}
+.leadership-assignment-form label{font-size:.85rem;font-weight:650;color:var(--deep)}
+.leadership-assignment-form select{width:100%;min-height:46px;padding:10px 12px;border:1px solid #c7d7e1;border-radius:9px;background:#fff;color:var(--deep);font:inherit}
+.leadership-assignment-form button{justify-self:start;border:0;cursor:pointer}
+.leadership-assignment-form button:disabled{opacity:.6;cursor:wait}
+@media(max-width:700px){.leadership-assignment-section{padding:15px}.leadership-assignment-form button{width:100%}}

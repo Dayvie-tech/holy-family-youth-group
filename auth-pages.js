@@ -387,6 +387,10 @@ async function setupAdminDashboard() {
   const assignmentForm = $('super-admin-assignment-form');
   const officeSelect = $('super-admin-office');
   const memberSelect = $('super-admin-member');
+  const leadershipAssignmentForm = $('leadership-assignment-form');
+  const leadershipMemberSelect = $('leadership-member-select');
+  const leadershipOfficeSelect = $('leadership-office-select');
+  const leadershipScopeSelect = $('leadership-scope-select');
   const superAdminOffices = ['Youth Chaplain', 'Youth Matron', 'Youth Patron', 'Parish Moderator'];
   let currentAdminUserId = null;
   let renderMemberRoster = () => {};
@@ -398,7 +402,7 @@ async function setupAdminDashboard() {
     superAdminPanel.hidden = false;
     officeList.innerHTML = '<div class="admin-empty">Loading office holders…</div>';
     const [membersResult, suspendedResult, assignmentsResult, housesResult] = await Promise.all([
-      supabase.from('profiles').select('id, full_name, primary_prayer_house_id').eq('membership_status', 'approved').order('full_name'),
+      supabase.from('profiles').select('id, full_name, primary_prayer_house_id, gender, chaplain_title').eq('membership_status', 'approved').order('full_name'),
       supabase.from('profiles').select('id, full_name, primary_prayer_house_id').eq('membership_status', 'suspended').order('full_name'),
       supabase.from('admin_assignments').select('id, user_id, super_admin_office').eq('access_level', 'super_admin').eq('is_active', true),
       supabase.from('prayer_houses').select('id, name')
@@ -665,7 +669,40 @@ async function setupAdminDashboard() {
       option.textContent = member.full_name;
       memberSelect.append(option);
     });
+
+    if (leadershipMemberSelect) {
+      leadershipMemberSelect.replaceChildren();
+      const leadershipPlaceholder = document.createElement('option');
+      leadershipPlaceholder.value = '';
+      leadershipPlaceholder.textContent = members.length ? 'Choose an approved member' : 'No approved members available';
+      leadershipMemberSelect.append(leadershipPlaceholder);
+      members.forEach((member) => {
+        const option = document.createElement('option');
+        option.value = member.id;
+        const houseName = houseNames.get(member.primary_prayer_house_id) || 'Prayer house not set';
+        option.textContent = member.full_name + ' — ' + houseName;
+        option.dataset.prayerHouseId = member.primary_prayer_house_id || '';
+        option.dataset.gender = member.gender || '';
+        option.dataset.chaplainTitle = member.chaplain_title || '';
+        leadershipMemberSelect.append(option);
+      });
+    }
   }
+
+  function updateChaplainMemberEligibility() {
+    if (!leadershipMemberSelect || !leadershipOfficeSelect) return;
+    const chaplainSelected = leadershipOfficeSelect.value === 'Chaplain';
+    [...leadershipMemberSelect.options].forEach((option) => {
+      if (!option.value) return;
+      const eligible = option.dataset.gender === 'male'
+        && ['Father', 'Deacon'].includes(option.dataset.chaplainTitle);
+      option.disabled = chaplainSelected && !eligible;
+    });
+    if (chaplainSelected && leadershipMemberSelect.selectedOptions[0]?.disabled) {
+      leadershipMemberSelect.value = '';
+    }
+  }
+  leadershipOfficeSelect?.addEventListener('change', updateChaplainMemberEligibility);
 
   assignmentForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -693,6 +730,49 @@ async function setupAdminDashboard() {
     }
   });
 
+  leadershipAssignmentForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const memberId = leadershipMemberSelect?.value;
+    const officeName = leadershipOfficeSelect?.value;
+    const scope = leadershipScopeSelect?.value;
+    const selectedMember = leadershipMemberSelect?.selectedOptions?.[0];
+    if (!memberId || !officeName || !scope) return;
+    const prayerHouseId = selectedMember?.dataset.prayerHouseId || '';
+    if (scope === 'prayer_house' && !prayerHouseId) {
+      showMessage(superAdminStatus, 'This member does not have a registered prayer house, so a prayer-house appointment cannot be assigned.', 'error');
+      return;
+    }
+    if (officeName === 'Chaplain' && (
+      selectedMember?.dataset.gender !== 'male'
+      || !['Father', 'Deacon'].includes(selectedMember?.dataset.chaplainTitle)
+    )) {
+      showMessage(superAdminStatus, 'The Parish Chaplain appointment requires a male member whose Church title is Father or Deacon.', 'error');
+      return;
+    }
+
+    const submit = $('assign-leadership-position');
+    submit.disabled = true;
+    submit.textContent = 'Assigning position…';
+    hideMessage(superAdminStatus);
+    try {
+      const { error } = await supabase.rpc('assign_leadership_position', {
+        p_member_id: memberId,
+        p_office_name: officeName,
+        p_scope: scope,
+        p_prayer_house_id: scope === 'prayer_house' ? Number(prayerHouseId) : null
+      });
+      if (error) throw error;
+      leadershipAssignmentForm.reset();
+      updateChaplainMemberEligibility();
+      await loadSuperAdminPanel(currentAdminUserId);
+      showMessage(superAdminStatus, officeName + ' has been assigned to the selected existing member. Their account and approved membership were not changed.', 'success');
+    } catch (error) {
+      showMessage(superAdminStatus, error.message || 'The leadership position could not be assigned.', 'error');
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Assign leadership position';
+    }
+  });
 
   async function loadAppointmentClaims(user, houseNames) {
     claimList.innerHTML = '<div class="admin-empty">Loading leadership claims…</div>';
