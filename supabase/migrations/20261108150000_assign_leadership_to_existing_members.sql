@@ -46,7 +46,7 @@ begin
       using errcode = '42501';
   end if;
 
-  if p_office_name not in (
+  if p_office_name is null or p_office_name not in (
     'Chairperson', 'Vice Chairperson', 'Secretary', 'Vice Secretary',
     'Organizing Secretary', 'Treasurer', 'Project Manager',
     'Assistant Project Manager', 'Games Coordinator', 'Catechist',
@@ -55,7 +55,7 @@ begin
     raise exception 'Choose a valid parish or prayer-house leadership position.';
   end if;
 
-  if p_scope not in ('parish', 'prayer_house') then
+  if p_scope is null or p_scope not in ('parish', 'prayer_house') then
     raise exception 'Choose either a parish-wide or prayer-house appointment.';
   end if;
 
@@ -84,8 +84,8 @@ begin
   end if;
 
   if p_office_name = 'Chaplain'
-     and (p_scope <> 'parish' or v_member.gender <> 'male'
-       or v_member.chaplain_title not in ('Father', 'Deacon')) then
+     and (p_scope <> 'parish' or v_member.gender is distinct from 'male'
+       or (v_member.chaplain_title is distinct from 'Father' and v_member.chaplain_title is distinct from 'Deacon')) then
     raise exception 'The Parish Chaplain appointment requires a male member whose Church title is Father or Deacon.';
   end if;
 
