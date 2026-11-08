@@ -522,11 +522,17 @@ async function setupAdminDashboard() {
             button.textContent = action === 'remove' ? 'Removing…' : 'Returning to review…';
             hideMessage(superAdminStatus);
             try {
-              const rpcName = action === 'remove'
-                ? 'super_admin_remove_member'
-                : 'super_admin_return_member_for_review';
-              const { error } = await supabase.rpc(rpcName, { p_target_member_id: member.id });
+              const nextStatus = action === 'remove' ? 'suspended' : 'pending';
+              const currentStatus = action === 'remove' ? 'approved' : 'suspended';
+              const { data, error } = await supabase
+                .from('profiles')
+                .update({ membership_status: nextStatus, updated_at: new Date().toISOString() })
+                .eq('id', member.id)
+                .eq('membership_status', currentStatus)
+                .select('id')
+                .maybeSingle();
               if (error) throw error;
+              if (!data) throw new Error('The member status has changed. Refresh the workspace and try again.');
 
               showMessage(superAdminStatus, action === 'remove'
                 ? member.full_name + ' has been removed from active membership. Their records have been preserved.'
