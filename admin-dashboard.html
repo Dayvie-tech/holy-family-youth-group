@@ -72,6 +72,43 @@
               <div class="admin-empty">Loading active leadership appointments…</div>
             </div>
           </section>
+          <section class="leadership-assignment-section" aria-labelledby="leadership-assignment-title">
+            <div class="admin-section-heading">
+              <h3 id="leadership-assignment-title">Assign a Leadership Position</h3>
+              <p>Appoint an existing approved member directly. Their current account and membership remain unchanged; no new registration is needed.</p>
+            </div>
+            <form id="leadership-assignment-form" class="leadership-assignment-form">
+              <label for="leadership-member-select">Existing approved member</label>
+              <select id="leadership-member-select" required>
+                <option value="">Loading approved members…</option>
+              </select>
+              <label for="leadership-office-select">Leadership position</label>
+              <select id="leadership-office-select" required>
+                <option value="">Choose a position</option>
+                <option>Chairperson</option>
+                <option>Vice Chairperson</option>
+                <option>Secretary</option>
+                <option>Vice Secretary</option>
+                <option>Organizing Secretary</option>
+                <option>Treasurer</option>
+                <option>Project Manager</option>
+                <option>Assistant Project Manager</option>
+                <option>Games Coordinator</option>
+                <option>Catechist</option>
+                <option>Patron</option>
+                <option>Matron</option>
+                <option>Chaplain</option>
+              </select>
+              <label for="leadership-scope-select">Appointment level</label>
+              <select id="leadership-scope-select" required>
+                <option value="">Choose appointment level</option>
+                <option value="parish">Parish-wide</option>
+                <option value="prayer_house">Member’s prayer house</option>
+              </select>
+              <button id="assign-leadership-position" class="button" type="submit">Assign leadership position</button>
+              <p class="admin-footnote">A prayer-house appointment is assigned to the selected member’s registered prayer house. If the position is already occupied, end the current appointment above before assigning a replacement. Super Admin offices are managed separately.</p>
+            </form>
+          </section>
           <form id="super-admin-assignment-form" class="super-admin-assignment-form">
             <h3>Appoint or transfer an office</h3>
             <label for="super-admin-office">Super Admin office</label>
