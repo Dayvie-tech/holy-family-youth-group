@@ -15,3 +15,11 @@
 .member-management-section .application-heading h3{font-size:1rem}
 .member-management-section .application-actions button{white-space:normal}
 @media(max-width:700px){.member-management-section{padding:15px}.member-roster-columns{grid-template-columns:1fr}}
+
+
+.leadership-management-section{margin:24px 0;padding:20px;background:#fff;border:1px solid var(--line);border-radius:14px}
+.leadership-management-section h3{margin:0 0 6px;color:var(--deep);font-size:1.25rem}
+.leadership-management-section .application-card{padding:15px}
+.leadership-management-section .application-actions button{white-space:normal}
+.leadership-end-button{background:#647987!important}
+@media(max-width:700px){.leadership-management-section{padding:15px}.leadership-management-section .application-actions button{width:100%}}
